@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import SearchBar from './SearchBar.jsx'
-import useCollectionSearch from '../hooks/useCollectionSearch.js'
+import useCollectionSearch from '../hooks/__tests__/useCollectionSearch.js'
 import { resolveUrl, shortenString } from '../utils/helperFunctions.jsx'
 import { createTraitOptions } from '../utils/filteringHelpers'
 import CollectionInfoHeader from './CollectionInfoHeader.jsx'

@@ -1,4 +1,4 @@
-import { shortenString } from '../utils/helperFunctions.jsx'
+import { shortenString } from './helperFunctions.jsx'
 
 export function createTraitOptions(collectionTraits) {
   if (!collectionTraits) return
