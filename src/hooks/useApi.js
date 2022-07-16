@@ -96,18 +96,27 @@ export default function useApi(query, selectedCollection) {
             (trait) => {
               const { traitType, value } = trait
 
-              const traitStat = collectionAttributes.filter(
-                (ref) => ref.trait_type === traitType && ref.value === value
-              )[0]
+              let traitStat
+              let rarityScore
 
-              let rarityScore =
-                1 / (parseFloat(traitStat.rarity_percentage) / 100)
+              if (!value.includes('Ξ')) {
+                traitStat = collectionAttributes.filter(
+                  (ref) => ref.trait_type === traitType && ref.value === value
+                )[0]
+
+                rarityScore =
+                  1 / (parseFloat(traitStat?.rarity_percentage) / 100)
+              }
 
               return {
                 ...trait,
-                overallCount: traitStat.overall_with_trait_value,
-                rarityPercentage: traitStat.rarity_percentage,
-                rarityScore: Number(rarityScore.toFixed(2)),
+                overallCount: traitStat
+                  ? traitStat.overall_with_trait_value
+                  : null,
+                rarityPercentage: traitStat
+                  ? traitStat.rarity_percentage
+                  : null,
+                rarityScore: rarityScore ? Number(rarityScore?.toFixed(2)) : 0,
               }
             }
           )
@@ -176,6 +185,7 @@ export default function useApi(query, selectedCollection) {
         const tokensData = await zdk.tokens({
           where: { tokens: tokenArgs },
           includeFullDetails: true,
+          pagination: { limit: 100 },
         })
 
         console.log('ZDK query -- ', tokensData)

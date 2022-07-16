@@ -37,17 +37,20 @@ export default function Home() {
         details,
       } = item || {}
 
-      const attributes = details.token.attributes
+      const { attributes, rarityScore: overallRarityScore } = details.token
 
       const attributesHtml = attributes?.map((item) => {
-        let { traitType, value } = item || {}
+        let { traitType, value, rarityPercentage, rarityScore } = item || {}
 
         value = shortenString(value)
 
         return (
           <div key={nanoid()} className="nft-card--trait">
             <div>{traitType}</div>
-            <div className="trait--value">{value}</div>
+            <div className="trait--value">
+              {value} {rarityPercentage ? `${rarityPercentage}%` : ''}{' '}
+              {rarityPercentage ? `+${rarityScore}` : ''}
+            </div>
           </div>
         )
       })
@@ -57,7 +60,10 @@ export default function Home() {
           <div className="nft-card--image-container">
             <div className="nft-card--image">{resolveUrl(image_url)}</div>
             <div className="nft-card--tokenId">{'#' + tokenId}</div>
-            <div className="nft-card--image-overlay">{attributesHtml}</div>
+            <div className="nft-card--image-overlay">
+              <div>{attributesHtml}</div>
+              <div>Overall rarity score: {overallRarityScore}</div>
+            </div>
           </div>
 
           <div>{`${price} ${priceSymbol} ($${parseInt(priceInUSD)})`}</div>
