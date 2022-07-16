@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import useApi from '../hooks/useApi'
 import SearchBar from '../components/SearchBar'
 import { nanoid } from 'nanoid'
-import { resolveUrl, shortenString } from '../utils/helperFunctions.jsx'
+import { resolveUrl, shortenString } from '../utils/formatting.jsx'
 import TimeAgo from 'timeago-react'
 
 export default function Home() {

@@ -8,6 +8,8 @@ import {
 } from '../utils/api.js'
 import { ZDK, ZDKNetwork, ZDKChain } from '@zoralabs/zdk'
 
+// axios.defaults.baseURL = `http://localhost:5000`
+
 export default function useApi(query, selectedCollection) {
   const [loading, setLoading] = useState({})
   const [error, setError] = useState(false)
@@ -62,7 +64,7 @@ export default function useApi(query, selectedCollection) {
 
   // fetch new listings of selected collection
   useEffect(() => {
-    console.log('get new listings from collection...')
+    console.log('fetching listings...')
 
     if (selectedCollection.address === '' || !selectedCollection.address) return // ignore the first render
 
@@ -72,20 +74,77 @@ export default function useApi(query, selectedCollection) {
         setError(false)
 
         let contractAddress = selectedCollection.address
+
+        // Get listings
         let config = createNewListingsConfig(contractAddress)
+        const listingsData = await axios(config).then((res) => res.data)
+        console.log('-- new listings:', listingsData)
+        const tokenIds = listingsData.listings.map((item) => item.tokenId)
 
-        const data = await axios(config).then((res) => res.data)
+        // Get asset details
+        async function getAssets(contractAddress, tokenIds) {
+          try {
+            console.log('fetching assets...')
+            let paramsArray = tokenIds.map((id) => `&token_ids=${id}`)
+            paramsArray = _chunkArray(paramsArray, 20)
 
-        console.log('-- new listings:', data)
+            let endpoints = paramsArray.map(
+              (chunk) =>
+                `https://api.opensea.io/api/v1/assets?asset_contract_address=${contractAddress}&limit=20${chunk}`
+            )
 
-        const tokenIds = data.listings.map((item) => item.tokenId)
+            const responses = await axios.all(
+              endpoints.map((endpoint) => axios.get(endpoint))
+            )
 
-        // getBatchTokenInfo(tokenIds, contractAddress)
-        const tokensData = await getZoraApi(tokenIds, contractAddress)
+            let tokensData = []
+            responses.map((res) => {
+              tokensData.push(...res.data.assets)
+            })
+
+            return tokensData
+          } catch (err) {
+            console.log(err)
+          }
+
+          function _chunkArray(myArray, chunk_size) {
+            var results = []
+
+            while (myArray.length) {
+              results.push(myArray.splice(0, chunk_size).join(''))
+            }
+
+            return results
+          }
+        }
+        const tokensData = await getAssets(contractAddress, tokenIds)
+        console.log(tokensData)
+
+        // Get collection details
         const collectionData = await getCollectionAttributes(contractAddress)
         const collectionAttributes =
           collectionData.included[0].attributes.attributes_stats
 
+        // Get floor prices by trait
+        const slug = listingsData.collection
+
+        async function getFloorPrices(slug) {
+          try {
+            console.log('fetching floor prices...')
+            const data = await axios
+              .get(`https://api.traitsniper.com/api/projects/${slug}/traits`)
+              .then((res) => res.data)
+
+            return data
+          } catch (err) {
+            console.log(err)
+          }
+        }
+
+        const traitFloorPrices = await getFloorPrices(slug)
+        console.log(traitFloorPrices)
+
+        // Calculate rarity stats for each asset
         const listingsWithDetails = data.listings.map((item) => {
           const tokenDetails = tokensData.tokens.nodes.filter(
             (token) => token.token.tokenId === item.tokenId
@@ -140,6 +199,7 @@ export default function useApi(query, selectedCollection) {
 
         console.log(listingsWithDetails)
 
+        // Set data state
         setData((prev) => ({
           ...prev,
           newListings: { ...data, listings: listingsWithDetails },
@@ -149,54 +209,6 @@ export default function useApi(query, selectedCollection) {
         setError(true)
       } finally {
         setLoading((prev) => ({ ...prev, listings: false }))
-      }
-    }
-
-    // This MODULE endpoint not working correctly
-    // async function getBatchTokenInfo(tokenIdsArray, contractAddress) {
-    //   let config = createBatchTokenInfoConfig(tokenIdsArray, contractAddress)
-
-    //   const data = await axios(config).then((res) =>
-    //     console.log('module get tokens -- ', res)
-    //   )
-    // }
-
-    async function getZoraApi(tokenIdsArray, contractAddress) {
-      try {
-        const networkInfo = {
-          network: ZDKNetwork.Ethereum,
-          chain: ZDKChain.Mainnet,
-        }
-
-        const API_ENDPOINT = 'https://api.zora.co/graphql'
-
-        const args = {
-          endPoint: API_ENDPOINT,
-          networks: [networkInfo],
-        }
-
-        const zdk = new ZDK(args)
-
-        let tokenArgs = tokenIdsArray.map((item) => ({
-          address: contractAddress,
-          tokenId: item,
-        }))
-
-        const tokensData = await zdk.tokens({
-          where: { tokens: tokenArgs },
-          includeFullDetails: true,
-          pagination: { limit: 100 },
-        })
-
-        console.log('ZDK query -- ', tokensData)
-
-        // const collectionTraits = await zdk.aggregateAttributes({
-        //   where: { collectionAddresses: contractAddress },
-        // })
-
-        return tokensData
-      } catch (err) {
-        console.log(err)
       }
     }
 
