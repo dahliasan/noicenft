@@ -6,9 +6,7 @@ import {
   createBatchTokenInfoConfig,
   API_KEYS,
 } from '../utils/api.js'
-import { ZDK, ZDKNetwork, ZDKChain } from '@zoralabs/zdk'
-
-// axios.defaults.baseURL = `http://localhost:5000`
+// import { ZDK, ZDKNetwork, ZDKChain } from '@zoralabs/zdk'
 
 export default function useApi(query, selectedCollection) {
   const [loading, setLoading] = useState({})
@@ -23,7 +21,6 @@ export default function useApi(query, selectedCollection) {
   }, [selectedCollection])
 
   // Search for collections
-
   useEffect(() => {
     console.log('searching collections...')
 
@@ -145,40 +142,35 @@ export default function useApi(query, selectedCollection) {
         console.log(traitFloorPrices)
 
         // Calculate rarity stats for each asset
-        const listingsWithDetails = data.listings.map((item) => {
-          const tokenDetails = tokensData.tokens.nodes.filter(
-            (token) => token.token.tokenId === item.tokenId
+        const listingsWithDetails = listingsData.listings.map((item) => {
+          const tokenDetails = tokensData.filter(
+            (token) => token.token_id === item.tokenId
           )[0]
 
           // get each trait rarity
-          const newAttributesArr = tokenDetails.token.attributes.map(
-            (trait) => {
-              const { traitType, value } = trait
+          const newAttributesArr = tokenDetails.traits.map((trait) => {
+            const { trait_type, value } = trait
 
-              let traitStat
-              let rarityScore
+            let traitStat
+            let rarityScore
 
-              if (!value.includes('Ξ')) {
-                traitStat = collectionAttributes.filter(
-                  (ref) => ref.trait_type === traitType && ref.value === value
-                )[0]
+            if (!String(value).includes('Ξ')) {
+              traitStat = collectionAttributes.filter(
+                (ref) => ref.trait_type === trait_type && ref.value === value
+              )[0]
 
-                rarityScore =
-                  1 / (parseFloat(traitStat?.rarity_percentage) / 100)
-              }
-
-              return {
-                ...trait,
-                overallCount: traitStat
-                  ? traitStat.overall_with_trait_value
-                  : null,
-                rarityPercentage: traitStat
-                  ? traitStat.rarity_percentage
-                  : null,
-                rarityScore: rarityScore ? Number(rarityScore?.toFixed(2)) : 0,
-              }
+              rarityScore = 1 / (parseFloat(traitStat?.rarity_percentage) / 100)
             }
-          )
+
+            return {
+              ...trait,
+              overallCount: traitStat
+                ? traitStat.overall_with_trait_value
+                : null,
+              rarityPercentage: traitStat ? traitStat.rarity_percentage : null,
+              rarityScore: rarityScore ? Number(rarityScore?.toFixed(2)) : 0,
+            }
+          })
 
           // calculate OVERALL rarity score of listing
           const overallRarityScore = newAttributesArr.reduce(
@@ -189,8 +181,8 @@ export default function useApi(query, selectedCollection) {
           )
 
           const newTokenObj = {
-            ...tokenDetails.token,
-            attributes: newAttributesArr,
+            ...tokenDetails,
+            traits: newAttributesArr,
             rarityScore: overallRarityScore.toFixed(2),
           }
 
