@@ -4,6 +4,7 @@ import SearchBar from '../components/SearchBar'
 import { nanoid } from 'nanoid'
 import { resolveUrl } from '../helpers/formatting.jsx'
 import TimeAgo from 'timeago-react'
+import { Container, Spinner } from '@chakra-ui/react'
 
 export default function Home() {
   const [query, setQuery] = useState('')
@@ -36,30 +37,33 @@ export default function Home() {
         details,
       } = item || {}
 
-      const { rank, score } = details.asset || {}
+      const { rank, score } = details?.asset || {}
 
       // create attributes html
       let attributesHtml = []
       let highestTraitFloorPrice = 0
-      for (const [trait, data] of Object.entries(details.trait_floors)) {
-        // console.log(`${trait}`, data)
-        const [traitType, value] = trait.split(';')
-        const rarityPercentage = (data.ratio * 100).toFixed(2)
-        const traitFloorPrice = data.assets_lowest_price[0]?.price / 10 ** 18
 
-        attributesHtml.push(
-          <div key={nanoid()} className="nft-card--trait">
-            <div>{traitType}</div>
-            <div className="trait--value">
-              {value} {rarityPercentage}%
+      if (details) {
+        for (const [trait, data] of Object.entries(details.trait_floors)) {
+          // console.log(`${trait}`, data)
+          const [traitType, value] = trait.split(';')
+          const rarityPercentage = (data.ratio * 100).toFixed(2)
+          const traitFloorPrice = data.assets_lowest_price[0]?.price / 10 ** 18
+
+          attributesHtml.push(
+            <div key={nanoid()} className="nft-card--trait">
+              <div>{traitType}</div>
+              <div className="trait--value">
+                {value} {rarityPercentage}%
+              </div>
+              <div>{traitFloorPrice}Ξ</div>
             </div>
-            <div>{traitFloorPrice}Ξ</div>
-          </div>
-        )
+          )
 
-        // get highest trait floor price
-        if (traitFloorPrice > highestTraitFloorPrice)
-          highestTraitFloorPrice = traitFloorPrice
+          // get highest trait floor price
+          if (traitFloorPrice > highestTraitFloorPrice)
+            highestTraitFloorPrice = traitFloorPrice
+        }
       }
 
       // create entire nft card html
@@ -100,7 +104,7 @@ export default function Home() {
   }
 
   return (
-    <>
+    <Container maxW="container.xl">
       <SearchBar
         query={query}
         handleChange={(e) => setQuery(e.target.value)}
@@ -111,10 +115,11 @@ export default function Home() {
 
       <div className="listings--container">
         {loading?.listings && <div>loading...</div>}
+
         {newListings && renderListings()}
       </div>
 
       {error && <div>error!</div>}
-    </>
+    </Container>
   )
 }

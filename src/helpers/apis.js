@@ -199,6 +199,7 @@ export async function getAssetsApi(contractAddress, tokenIds, options = {}) {
     return tokensData
   } catch (err) {
     console.log(err)
+    return null
   }
 }
 

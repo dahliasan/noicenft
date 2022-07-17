@@ -91,7 +91,7 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
           // console.log(listing.tokenId, tokensData[index].asset.token_id)
           return {
             ...listing,
-            details: tokensData[index],
+            details: tokensData ? tokensData[index] : null,
           }
         })
 
