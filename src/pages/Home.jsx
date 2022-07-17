@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-// import { nanoid } from 'nanoid'
 import useApi from '../hooks/useApi'
 import SearchBar from '../components/SearchBar'
 import { nanoid } from 'nanoid'
-import { resolveUrl, shortenString } from '../utils/formatting.jsx'
+import { resolveUrl } from '../helpers/formatting.jsx'
 import TimeAgo from 'timeago-react'
 
 export default function Home() {
@@ -24,7 +23,7 @@ export default function Home() {
   function renderListings() {
     const { collection, count, listings, error } = newListings
 
-    // get nft html
+    // get nft section html
     const listingsHtml = listings.map((item) => {
       const {
         tokenId,
@@ -37,24 +36,33 @@ export default function Home() {
         details,
       } = item || {}
 
-      const { attributes, rarityScore: overallRarityScore } = details.token
+      const { rank, score } = details.asset || {}
 
-      const attributesHtml = attributes?.map((item) => {
-        let { traitType, value, rarityPercentage, rarityScore } = item || {}
+      // create attributes html
+      let attributesHtml = []
+      let highestTraitFloorPrice = 0
+      for (const [trait, data] of Object.entries(details.trait_floors)) {
+        // console.log(`${trait}`, data)
+        const [traitType, value] = trait.split(';')
+        const rarityPercentage = (data.ratio * 100).toFixed(2)
+        const traitFloorPrice = data.assets_lowest_price[0]?.price / 10 ** 18
 
-        value = shortenString(value)
-
-        return (
+        attributesHtml.push(
           <div key={nanoid()} className="nft-card--trait">
             <div>{traitType}</div>
             <div className="trait--value">
-              {value} {rarityPercentage ? `${rarityPercentage}%` : ''}{' '}
-              {rarityPercentage ? `+${rarityScore}` : ''}
+              {value} {rarityPercentage}%
             </div>
+            <div>{traitFloorPrice}Ξ</div>
           </div>
         )
-      })
 
+        // get highest trait floor price
+        if (traitFloorPrice > highestTraitFloorPrice)
+          highestTraitFloorPrice = traitFloorPrice
+      }
+
+      // create entire nft card html
       return (
         <div key={nanoid()} className="nft-card--container">
           <div className="nft-card--image-container">
@@ -62,11 +70,18 @@ export default function Home() {
             <div className="nft-card--tokenId">{'#' + tokenId}</div>
             <div className="nft-card--image-overlay">
               <div>{attributesHtml}</div>
-              <div>Overall rarity score: {overallRarityScore}</div>
+              <div>Overall rarity score: {Math.round(score)}</div>
+              <div>Overall rarity rank: {rank}</div>
             </div>
           </div>
 
-          <div>{`${price} ${priceSymbol} ($${parseInt(priceInUSD)})`}</div>
+          <div>{`${price} ${priceSymbol} ($${parseInt(priceInUSD)}) ${
+            price < highestTraitFloorPrice
+              ? '🤑'
+              : price > highestTraitFloorPrice
+              ? '🧐'
+              : ''
+          }`}</div>
           <div>
             Listed <TimeAgo datetime={`${eventTimestamp}Z`} />
           </div>

@@ -1,4 +1,6 @@
-async function getZoraApi(tokenIdsArray, contractAddress) {
+import { ZDK, ZDKNetwork, ZDKChain } from '@zoralabs/zdk'
+
+export async function getZoraApi(tokenIdsArray, contractAddress) {
   try {
     const networkInfo = {
       network: ZDKNetwork.Ethereum,

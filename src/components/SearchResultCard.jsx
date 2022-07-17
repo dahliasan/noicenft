@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { API_KEYS } from '../utils/api'
+import { API_KEYS } from '../helpers/api'
 
 function SearchResultCard(props) {
   const { collection, handleClick } = props

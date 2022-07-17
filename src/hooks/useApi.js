@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import {
-  createSearchCollectionConfig,
-  createNewListingsConfig,
-  createBatchTokenInfoConfig,
-  API_KEYS,
-} from '../utils/api.js'
-// import { ZDK, ZDKNetwork, ZDKChain } from '@zoralabs/zdk'
 
-export default function useApi(query, selectedCollection) {
+import {
+  getSearchCollectionsApi,
+  getNewListingsApi,
+  getAssetsApi,
+  getTraitFloorPricesApi,
+  getContractSmartFloorPriceApi,
+  getContractSalesStatsApi,
+  getContractInsightsApi,
+  getContractApi,
+} from '../helpers/apis.js'
+
+export default function useApi(query, selectedCollection, insightsPeriod) {
   const [loading, setLoading] = useState({})
   const [error, setError] = useState(false)
   const [data, setData] = useState({})
@@ -34,34 +38,31 @@ export default function useApi(query, selectedCollection) {
     }
 
     async function searchCollections() {
-      setLoading((prev) => ({ ...prev, search: true }))
-      setError(null)
+      try {
+        setLoading((prev) => ({ ...prev, search: true }))
+        setError(null)
 
-      let config = createSearchCollectionConfig(query, {
-        signal: abortController.signal,
-      })
+        const data = await getSearchCollectionsApi(query, {
+          signal: abortController.signal,
+        })
 
-      const data = await axios(config).then((res) => res.data)
-      console.log('--- search collections', data)
-      setData((prev) => ({ ...prev, search: data }))
+        setData((prev) => ({ ...prev, search: data }))
+      } catch (err) {
+        console.log(err)
+        setError(true)
+      } finally {
+        setLoading((prev) => ({ ...prev, search: false }))
+      }
     }
 
     searchCollections()
-      .catch((error) => {
-        if (error.name === 'CanceledError') return
-        console.log(error)
-        setError(true)
-      })
-      .finally(() => {
-        setLoading((prev) => ({ ...prev, search: false }))
-      })
 
     return () => abortController.abort()
   }, [query])
 
   // fetch new listings of selected collection
   useEffect(() => {
-    console.log('fetching listings...')
+    const abortController = new AbortController()
 
     if (selectedCollection.address === '' || !selectedCollection.address) return // ignore the first render
 
@@ -72,129 +73,55 @@ export default function useApi(query, selectedCollection) {
 
         let contractAddress = selectedCollection.address
 
-        // Get listings
-        let config = createNewListingsConfig(contractAddress)
-        const listingsData = await axios(config).then((res) => res.data)
-        console.log('-- new listings:', listingsData)
+        // Get new listings
+        console.log('fetching listings...')
+        const listingsData = await getNewListingsApi(contractAddress, {
+          signal: abortController.signal,
+        })
+        console.log('get new listings -- ', listingsData)
+
         const tokenIds = listingsData.listings.map((item) => item.tokenId)
 
         // Get asset details
-        async function getAssets(contractAddress, tokenIds) {
-          try {
-            console.log('fetching assets...')
-            let paramsArray = tokenIds.map((id) => `&token_ids=${id}`)
-            paramsArray = _chunkArray(paramsArray, 20)
+        const tokensData = await getAssetsApi(contractAddress, tokenIds)
+        console.log('assets -- ', tokensData)
 
-            let endpoints = paramsArray.map(
-              (chunk) =>
-                `https://api.opensea.io/api/v1/assets?asset_contract_address=${contractAddress}&limit=20${chunk}`
-            )
-
-            const responses = await axios.all(
-              endpoints.map((endpoint) => axios.get(endpoint))
-            )
-
-            let tokensData = []
-            responses.map((res) => {
-              tokensData.push(...res.data.assets)
-            })
-
-            return tokensData
-          } catch (err) {
-            console.log(err)
+        // normalise listing data
+        const newListingsArray = listingsData.listings.map((listing, index) => {
+          // console.log(listing.tokenId, tokensData[index].asset.token_id)
+          return {
+            ...listing,
+            details: tokensData[index],
           }
-
-          function _chunkArray(myArray, chunk_size) {
-            var results = []
-
-            while (myArray.length) {
-              results.push(myArray.splice(0, chunk_size).join(''))
-            }
-
-            return results
-          }
-        }
-        const tokensData = await getAssets(contractAddress, tokenIds)
-        console.log(tokensData)
-
-        // Get collection details
-        const collectionData = await getCollectionAttributes(contractAddress)
-        const collectionAttributes =
-          collectionData.included[0].attributes.attributes_stats
-
-        // Get floor prices by trait
-        const slug = listingsData.collection
-
-        async function getFloorPrices(slug) {
-          try {
-            console.log('fetching floor prices...')
-            const data = await axios
-              .get(`https://api.traitsniper.com/api/projects/${slug}/traits`)
-              .then((res) => res.data)
-
-            return data
-          } catch (err) {
-            console.log(err)
-          }
-        }
-
-        const traitFloorPrices = await getFloorPrices(slug)
-        console.log(traitFloorPrices)
-
-        // Calculate rarity stats for each asset
-        const listingsWithDetails = listingsData.listings.map((item) => {
-          const tokenDetails = tokensData.filter(
-            (token) => token.token_id === item.tokenId
-          )[0]
-
-          // get each trait rarity
-          const newAttributesArr = tokenDetails.traits.map((trait) => {
-            const { trait_type, value } = trait
-
-            let traitStat
-            let rarityScore
-
-            if (!String(value).includes('Ξ')) {
-              traitStat = collectionAttributes.filter(
-                (ref) => ref.trait_type === trait_type && ref.value === value
-              )[0]
-
-              rarityScore = 1 / (parseFloat(traitStat?.rarity_percentage) / 100)
-            }
-
-            return {
-              ...trait,
-              overallCount: traitStat
-                ? traitStat.overall_with_trait_value
-                : null,
-              rarityPercentage: traitStat ? traitStat.rarity_percentage : null,
-              rarityScore: rarityScore ? Number(rarityScore?.toFixed(2)) : 0,
-            }
-          })
-
-          // calculate OVERALL rarity score of listing
-          const overallRarityScore = newAttributesArr.reduce(
-            (prev, current) => {
-              return prev + current.rarityScore
-            },
-            0
-          )
-
-          const newTokenObj = {
-            ...tokenDetails,
-            traits: newAttributesArr,
-            rarityScore: overallRarityScore.toFixed(2),
-          }
-
-          return { ...item, details: { ...tokenDetails, token: newTokenObj } }
         })
 
-        console.log(listingsWithDetails)
+        // Get collection stats
+        const slug = listingsData.collection
+        console.log('fetching collection stats...')
+        const [traitFloorPrices, smartFloorPrice, salesStats] =
+          await Promise.all([
+            getTraitFloorPricesApi(slug),
+            getContractSmartFloorPriceApi(contractAddress),
+            getContractSalesStatsApi(contractAddress),
+          ])
+        const collectionStats = {
+          traitFloorPrices,
+          smartFloorPrice: smartFloorPrice.data,
+          salesStats: salesStats.statstics,
+        }
+
+        console.log('collection stats -- ', collectionStats)
+
+        // Get collection insights
+        const collectionInsights = await getContractInsightsApi(contractAddress)
+        console.log('collection insights -- ', collectionInsights)
 
         // Set data state
         setData((prev) => ({
           ...prev,
-          newListings: { ...data, listings: listingsWithDetails },
+          newListings: { ...listingsData, listings: newListingsArray },
+          collectionStats: collectionStats,
+          collectionInsights: collectionInsights,
         }))
       } catch (err) {
         console.log(err)
@@ -204,39 +131,36 @@ export default function useApi(query, selectedCollection) {
       }
     }
 
-    async function getCollectionAttributes(contractAddress) {
-      const config = {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-        url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}`,
-        params: {
-          include: 'token_attributes',
-        },
-      }
-      const data = await axios(config).then((res) => res.data)
-      console.log('rarify fetch -- ', data)
-      return data
-    }
-
     getNewListings()
+
+    return () => abortController.abort()
   }, [selectedCollection])
 
   // Fetch trending collections using rarify API
-  //   useEffect(() => {
-  //     const config = {
-  //       method: 'GET',
-  //       headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-  //       url: 'https://api.rarify.tech/data/contracts',
-  //       params: {
-  //         'insights_trends.period': '30d',
-  //         include: 'insights_trends',
-  //         sort: '-insights_trends.volume_change_percent',
-  //         'page[limit]': 3,
-  //       },
-  //     }
+  useEffect(() => {
+    async function getTrendingCollections() {
+      try {
+        setLoading((prev) => ({ ...prev, trending: true }))
+        const params = {
+          'insights_trends.period': '24h',
+          include: 'insights_trends',
+          sort: '-insights_trends.volume_change_percent',
+          'page[limit]': 10,
+        }
 
-  //     axios(config).then((res) => console.log(res.data))
-  //   }, [])
+        const data = await getContractApi('', params)
+        console.log('trending collections -- ', data)
+
+        setData((prev) => ({ ...prev, trendingCollections: data }))
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoading((prev) => ({ ...prev, trending: false }))
+      }
+    }
+
+    getTrendingCollections()
+  }, [])
 
   return { data, loading, error }
 }
