@@ -3,6 +3,7 @@ import axios from 'axios'
 
 import {
   getSearchCollectionsApi,
+  getNewListingsV2Api,
   getNewListingsApi,
   getAssetsApi,
   getTraitFloorPricesApi,
@@ -75,9 +76,13 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
 
         // Get new listings
         console.log('fetching listings...')
-        const listingsData = await getNewListingsApi(contractAddress, {
-          signal: abortController.signal,
-        })
+        const listingsData = await getNewListingsApi(
+          contractAddress,
+          {
+            signal: abortController.signal,
+          },
+          { count: 3 }
+        )
         console.log('get new listings -- ', listingsData)
 
         const tokenIds = listingsData.listings.map((item) => item.tokenId)

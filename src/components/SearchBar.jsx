@@ -32,7 +32,7 @@ export default function SearchBar(props) {
         </InputGroup>
 
         <Box pos="relative">
-          <Box pos="absolute" zIndex="dropdown" w="100%">
+          <Box pos="absolute" zIndex="dropdown" w="full">
             {searchResults?.collections.map((collection) => {
               return (
                 <SearchResultCard

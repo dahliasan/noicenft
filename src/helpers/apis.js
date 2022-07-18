@@ -153,7 +153,11 @@ export async function getSearchCollectionsApi(query, options = {}) {
   }
 }
 
-export async function getNewListingsApi(contractAddress, options = {}) {
+export async function getNewListingsApi(
+  contractAddress,
+  options = {},
+  params = {}
+) {
   try {
     const config = {
       method: 'GET',
@@ -161,8 +165,41 @@ export async function getNewListingsApi(contractAddress, options = {}) {
       url: `https://api.modulenft.xyz/api/v1/opensea/listings/new-listings`,
       params: {
         type: contractAddress,
-        count: 100,
+        count: 3,
         currencySymbol: 'ETH',
+        ...params,
+      },
+      ...options,
+    }
+
+    const data = await axios(config).then((res) => res.data)
+
+    return data
+  } catch (err) {
+    if (err.name === 'CanceledError') return
+    console.log(err)
+    throw err
+  }
+}
+
+// 'https://api.modulenft.xyz/api/v1/opensea/listings/listingsV2?type=azuki&count=25&offset=0&currencySymbol=ETH&stringTraits=Type%253ASpirit'
+
+//'https://api.modulenft.xyz/api/v1/opensea/listings/listingsV2?type=0xed5af388653567af2f388e6224dc7c4b3241c544&count=25&offset=0&currencySymbol=ETH&stringTraits=Type%253ASpirit'
+
+export async function getNewListingsV2Api(
+  contractAddress,
+  options = {},
+  params = {}
+) {
+  try {
+    const config = {
+      method: 'GET',
+      headers: module_header,
+      url: `https://api.modulenft.xyz/api/v1/opensea/listings/listingsV2`,
+      params: {
+        type: contractAddress,
+        count: 3,
+        ...params,
       },
       ...options,
     }

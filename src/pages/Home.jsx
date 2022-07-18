@@ -1,10 +1,21 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+// TODO:
+// Change listing feed component to a single listing card - make the card a drawer
+
+import { useState, useEffect } from 'react'
 import useApi from '../hooks/useApi'
 import SearchBar from '../components/SearchBar'
+import TokenDetails from '../components/TokenDetails'
+import ListingCard from '../components/ListingCard'
+import {
+  Container,
+  Center,
+  Spinner,
+  Flex,
+  VStack,
+  Text,
+  Heading,
+} from '@chakra-ui/react'
 import { nanoid } from 'nanoid'
-import { resolveUrl } from '../helpers/formatting.jsx'
-import TimeAgo from 'timeago-react'
-import { Container, Spinner } from '@chakra-ui/react'
 
 export default function Home() {
   const [query, setQuery] = useState('')
@@ -15,92 +26,21 @@ export default function Home() {
   const { loading, error, data } = useApi(query, selectedCollection)
   const { search, newListings } = data || {}
 
+  const [selectedToken, setSelectedToken] = useState('')
+
+  useEffect(() => {
+    setSelectedToken('')
+  }, [selectedCollection])
+
   function handleSearchClick(name, contractAddress) {
     console.log(`--- collection ${name} ${contractAddress} is selected!`)
     setSelectedCollection({ name: name, address: contractAddress })
     setQuery('')
   }
 
-  function renderListings() {
-    const { collection, count, listings, error } = newListings
-
-    // get nft section html
-    const listingsHtml = listings.map((item) => {
-      const {
-        tokenId,
-        eventTimestamp,
-        image_url,
-        permalink,
-        price,
-        priceInUSD,
-        priceSymbol,
-        details,
-      } = item || {}
-
-      const { rank, score } = details?.asset || {}
-
-      // create attributes html
-      let attributesHtml = []
-      let highestTraitFloorPrice = 0
-
-      if (details) {
-        for (const [trait, data] of Object.entries(details.trait_floors)) {
-          // console.log(`${trait}`, data)
-          const [traitType, value] = trait.split(';')
-          const rarityPercentage = (data.ratio * 100).toFixed(2)
-          const traitFloorPrice = data.assets_lowest_price[0]?.price / 10 ** 18
-
-          attributesHtml.push(
-            <div key={nanoid()} className="nft-card--trait">
-              <div>{traitType}</div>
-              <div className="trait--value">
-                {value} {rarityPercentage}%
-              </div>
-              <div>{traitFloorPrice}Ξ</div>
-            </div>
-          )
-
-          // get highest trait floor price
-          if (traitFloorPrice > highestTraitFloorPrice)
-            highestTraitFloorPrice = traitFloorPrice
-        }
-      }
-
-      // create entire nft card html
-      return (
-        <div key={nanoid()} className="nft-card--container">
-          <div className="nft-card--image-container">
-            <div className="nft-card--image">{resolveUrl(image_url)}</div>
-            <div className="nft-card--tokenId">{'#' + tokenId}</div>
-            <div className="nft-card--image-overlay">
-              <div>{attributesHtml}</div>
-              <div>Overall rarity score: {Math.round(score)}</div>
-              <div>Overall rarity rank: {rank}</div>
-            </div>
-          </div>
-
-          <div>{`${price} ${priceSymbol} ($${parseInt(priceInUSD)}) ${
-            price < highestTraitFloorPrice
-              ? '🤑'
-              : price > highestTraitFloorPrice
-              ? '🧐'
-              : ''
-          }`}</div>
-          <div>
-            Listed <TimeAgo datetime={`${eventTimestamp}Z`} />
-          </div>
-          <a href={permalink} target="_blank">
-            Buy on OpenSea
-          </a>
-        </div>
-      )
-    })
-
-    return (
-      <>
-        <div className="collection-nfts--container">{listingsHtml}</div>
-      </>
-    )
+  function handleListingClick(tokenId) {
+    setSelectedToken(tokenId)
+    console.log(tokenId, 'clicked!')
   }
 
   return (
@@ -110,14 +50,54 @@ export default function Home() {
         handleChange={(e) => setQuery(e.target.value)}
         searchResults={search}
         handleClick={handleSearchClick}
-        loading={loading.search}
+        loading={loading.search || loading?.listings}
       />
 
-      <div className="listings--container">
-        {loading?.listings && <div>loading...</div>}
+      <Flex my={10} direction={{ base: 'column', lg: 'row' }}>
+        <VStack w="full" padding={10} alignItems="flex-start">
+          <Heading>New Listings</Heading>
+          <Flex
+            direction={{ base: 'row', lg: 'column' }}
+            wrap={{ base: 'wrap', lg: 'nowrap' }}
+            w={{ base: 'auto', lg: 'full' }}
+            gap={3}
+            alignItems="stretch"
+          >
+            {newListings?.listings?.map((item) => {
+              return (
+                <ListingCard
+                  key={nanoid()}
+                  data={item}
+                  handleClick={handleListingClick}
+                  selectedToken={selectedToken}
+                />
+              )
+            })}
+          </Flex>
+        </VStack>
 
-        {newListings && renderListings()}
-      </div>
+        <VStack
+          w="full"
+          background="gray.100"
+          padding={10}
+          alignItems="flex-start"
+          borderRadius="15px"
+        >
+          <Heading>The Deets</Heading>
+          {/* Use Stat component */}
+          {selectedToken === '' && (
+            <Text>Click on a listing to view its details</Text>
+          )}
+
+          <TokenDetails
+            data={
+              newListings?.listings?.filter(
+                (item) => item.tokenId === selectedToken
+              )[0]
+            }
+          />
+        </VStack>
+      </Flex>
 
       {error && <div>error!</div>}
     </Container>
