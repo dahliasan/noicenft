@@ -62,10 +62,12 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
   }, [query])
 
   // fetch new listings of selected collection
+
   useEffect(() => {
     const abortController = new AbortController()
 
     if (!selectedCollection) return // ignore the first render
+
     console.log(selectedCollection)
 
     async function getNewListings() {
@@ -77,13 +79,9 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
 
         // Get new listings
         console.log('fetching listings...')
-        const listingsData = await getNewListingsApi(
-          contractAddress,
-          {
-            signal: abortController.signal,
-          },
-          { count: 3 }
-        )
+        const listingsData = await getNewListingsApi(contractAddress, {
+          signal: abortController.signal,
+        })
         console.log('get new listings -- ', listingsData)
 
         const tokenIds = listingsData.listings.map((item) => item.tokenId)
@@ -92,7 +90,7 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
         const tokensData = await getAssetsApi(contractAddress, tokenIds)
         console.log('assets -- ', tokensData)
 
-        // normalise listing data
+        // combine and normalise listing data with details
         const newListingsArray = listingsData.listings.map((listing, index) => {
           // console.log(listing.tokenId, tokensData[index].asset.token_id)
           return {
@@ -101,33 +99,10 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
           }
         })
 
-        // // Get collection stats
-        // const slug = listingsData.collection
-        // console.log('fetching collection stats...')
-        // const [traitFloorPrices, smartFloorPrice, salesStats] =
-        //   await Promise.all([
-        //     getTraitFloorPricesApi(slug),
-        //     getContractSmartFloorPriceApi(contractAddress),
-        //     getContractSalesStatsApi(contractAddress),
-        //   ])
-        // const collectionStats = {
-        //   traitFloorPrices,
-        //   smartFloorPrice: smartFloorPrice.data,
-        //   salesStats: salesStats.statstics,
-        // }
-
-        // console.log('collection stats -- ', collectionStats)
-
-        // // Get collection insights
-        // const collectionInsights = await getContractInsightsApi(contractAddress)
-        // console.log('collection insights -- ', collectionInsights)
-
         // Set data state
         setData((prev) => ({
           ...prev,
           newListings: { ...listingsData, listings: newListingsArray },
-          // collectionStats: collectionStats,
-          // collectionInsights: collectionInsights,
         }))
       } catch (err) {
         console.log(err)
@@ -139,7 +114,14 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
 
     getNewListings()
 
-    return () => abortController.abort()
+    const interval = setInterval(() => {
+      getNewListings()
+    }, 300000)
+
+    return () => {
+      clearInterval(interval)
+      abortController.abort()
+    }
   }, [selectedCollection])
 
   // Fetch trending collections using rarify API
@@ -169,4 +151,34 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
   }, [])
 
   return { data, loading, error }
+}
+
+async function getCollectionStats(contractAddress, slug) {
+  try {
+    // Get collection stats
+    console.log('fetching collection stats...')
+    const [traitFloorPrices, smartFloorPrice, salesStats] = await Promise.all([
+      getTraitFloorPricesApi(slug),
+      getContractSmartFloorPriceApi(contractAddress),
+      getContractSalesStatsApi(contractAddress),
+    ])
+    const collectionStats = {
+      traitFloorPrices,
+      smartFloorPrice: smartFloorPrice.data,
+      salesStats: salesStats.statstics,
+    }
+    console.log('collection stats -- ', collectionStats)
+
+    // Get collection insights
+    const collectionInsights = await getContractInsightsApi(contractAddress)
+    console.log('collection insights -- ', collectionInsights)
+
+    setData((prev) => ({
+      ...prev,
+      collectionStats: collectionStats,
+      collectionInsights: collectionInsights,
+    }))
+  } catch (err) {
+    console.log(err)
+  }
 }

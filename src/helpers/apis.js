@@ -126,6 +126,7 @@ export async function getZDKApi(tokenIdsArray, contractAddress) {
 const module_header = {
   Accept: 'application/json',
   'X-API-KEY': API_KEYS.module,
+  'x-bypass-cache': true,
 }
 
 export async function getSearchCollectionsApi(query, options = {}) {

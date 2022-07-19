@@ -12,6 +12,8 @@ import {
   Button,
   Link,
   Badge,
+  Wrap,
+  AspectRatio,
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { resolveUrl } from '../helpers/formatting'
@@ -93,25 +95,26 @@ export default function ListingCard({ data, totalSupply }) {
       <>
         <Flex
           key={nanoid()}
+          direction="column"
           justify="space-between"
           border="solid black 2px"
           borderRadius="10px"
           p={3}
           gap={2}
-          direction="column"
+          // maxW="15rem"
+          // flex="1 1"
           bg={isOpen ? 'yellow' : 'white'}
           onClick={() => handleClick(tokenId)}
         >
           <Image
             src={resolveUrl(image_url)}
             alt={`${collection} token id ${tokenId} nft`}
-            objectFit="contain"
-            w="200px"
-            maxH="200px"
+            objectFit="cover"
             rounded="xl"
+            // maxH="15rem"
           />
 
-          <HStack>
+          <HStack alignItems="flex-start" wrap="wrap" gapy={1}>
             <Tooltip label="token id">
               <Badge>#{tokenId}</Badge>
             </Tooltip>
@@ -120,7 +123,7 @@ export default function ListingCard({ data, totalSupply }) {
             </Tooltip>
             {isPaperhand && (
               <Tooltip label={`selling below cost price`}>
-                <Badge bg="gray.900">🧻</Badge>
+                <Badge>🧻</Badge>
               </Tooltip>
             )}
           </HStack>
@@ -133,7 +136,7 @@ export default function ListingCard({ data, totalSupply }) {
             <Text fontSize="sm">{priceInUSD_formatted}</Text>
           </HStack>
 
-          <Button>
+          <Button whitespace="normal">
             <Link
               href={permalink}
               _hover={{

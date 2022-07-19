@@ -56,6 +56,6 @@ export function shortenString(value) {
   return value
 }
 
-export function parseDecimals(value, base = 18, decimals = 2) {
+export function parseHex(value, base = 18, decimals = 2) {
   return (value / 10 ** base).toFixed(decimals)
 }

@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 
-import { parseDecimals } from '../helpers/formatting'
+import { parseHex } from '../helpers/formatting'
 
 export default function TokenDetails({ data, basicInfo }) {
   try {
@@ -73,19 +73,23 @@ export default function TokenDetails({ data, basicInfo }) {
                 Floor: {traitFloorPrice}Ξ
               </Text>
             </Tooltip>
-            <Tooltip label="Rarest ranked token for sale with this trait">
-              <Text fontSize="sm" color="gray.500" noOfLines={1}>
-                Rarest rank listed:{' '}
-                <Link
-                  href={`https://opensea.io/assets/ethereum/${asset.contract_address}/${info.assets_lowest_rank[0].token_id}`}
-                  isExternal
-                >
-                  {info.assets_lowest_rank[0].rank} {' @ '}
-                  {(info.assets_lowest_rank[0].price / 10 ** 18).toFixed(0)}Ξ
-                  <ExternalLinkIcon mx="2px" />
-                </Link>
-              </Text>
-            </Tooltip>
+            {info.assets_lowest_rank[0] && (
+              <Tooltip
+                label={`Rarest ranked token for sale with this trait is ${info.assets_lowest_rank[0].rank} @ ${info.assets_lowest_rank[0].price}`}
+              >
+                <Text fontSize="sm" color="gray.500" noOfLines={1}>
+                  Rarest rank listed:{' '}
+                  <Link
+                    href={`https://opensea.io/assets/ethereum/${asset.contract_address}/${info.assets_lowest_rank[0].token_id}`}
+                    isExternal
+                  >
+                    {info.assets_lowest_rank[0].rank} {' @ '}
+                    {parseHex(info.assets_lowest_rank[0].price)}Ξ
+                    <ExternalLinkIcon mx="2px" />
+                  </Link>
+                </Text>
+              </Tooltip>
+            )}
             <Tooltip
               label={`${info.count_for_sale}/${info.count_total} (${(
                 (info.count_for_sale / info.count_total) *
@@ -113,29 +117,36 @@ export default function TokenDetails({ data, basicInfo }) {
             <Text textTransform="uppercase" fontSize="xs">
               {collection.name}
             </Text>
-            <HStack alignItems="baseline">
-              <Text fontSize="3xl" fontWeight="bold">
+
+            {asset.metadata.name && (
+              <Text fontSize="xs">{asset.metadata.name}</Text>
+            )}
+            <HStack wrap="wrap" alignItems="baseline" spacing={1}>
+              <Text fontSize="2xl" fontWeight="bold">
                 {basicInfo.price} {basicInfo.price_symbol}
               </Text>
               <Text fontSize="sm">{basicInfo.price_usd}</Text>
             </HStack>
-            <Text fontSize="sm">
-              {last_sale ? (
-                <>
-                  Last sold for {parseDecimals(last_sale.total_price)}
+            {last_sale ? (
+              <>
+                <Text fontSize="sm">
+                  Last sold for {parseHex(last_sale.total_price)}
                   {' ' + last_sale.payment_symbol}
-                </>
-              ) : (
-                'No sale history'
-              )}
-            </Text>
+                </Text>
+                <Text fontSize="sm">
+                  Total sales: {asset.metadata.num_sales}
+                </Text>
+              </>
+            ) : (
+              <Text fontSize="sm">No sales history</Text>
+            )}
 
             <Box>
               <Tooltip label={basicInfo.rank_label}>
                 <Badge bg={basicInfo.rank_color}>Rank {basicInfo.rank}</Badge>
               </Tooltip>
             </Box>
-            <Button>
+            <Button whiteSpace="normal">
               <Link
                 href={basicInfo.permalink}
                 _hover={{
