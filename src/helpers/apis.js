@@ -165,7 +165,7 @@ export async function getNewListingsApi(
       url: `https://api.modulenft.xyz/api/v1/opensea/listings/new-listings`,
       params: {
         type: contractAddress,
-        count: 3,
+        count: 20,
         currencySymbol: 'ETH',
         ...params,
       },
