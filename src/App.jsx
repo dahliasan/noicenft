@@ -12,10 +12,7 @@ function App() {
     <div className="App">
       {/* <Navbar /> */}
       <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/nft-flipper-helper" element={<Home />} />
-        </Routes>
+        <Home />
       </main>
     </div>
   )
