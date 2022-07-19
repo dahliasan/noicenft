@@ -10,32 +10,26 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 
-export default function TokenDetailsDrawer() {
-  const [size, setSize] = React.useState('')
+import { Button } from '@chakra-ui/react'
+
+export default function DrawerExample() {
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const handleClick = (newSize) => {
-    setSize(newSize)
+  const handleClick = () => {
     onOpen()
   }
 
-  const sizes = ['xs', 'sm', 'md', 'lg', 'xl', 'full']
+  console.log(isOpen)
 
   return (
     <>
-      {sizes.map((size) => (
-        <Button
-          onClick={() => handleClick(size)}
-          key={size}
-          m={4}
-        >{`Open ${size} Drawer`}</Button>
-      ))}
+      <Button onClick={() => handleClick()} m={4}>{`Open Drawer`}</Button>
 
-      <Drawer onClose={onClose} isOpen={isOpen} size={size}>
+      <Drawer onClose={onClose} isOpen={isOpen} size="sm">
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>{`${size} drawer contents`}</DrawerHeader>
+          <DrawerHeader>{`drawer contents`}</DrawerHeader>
           <DrawerBody>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do

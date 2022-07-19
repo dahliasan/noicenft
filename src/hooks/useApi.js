@@ -65,7 +65,8 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
   useEffect(() => {
     const abortController = new AbortController()
 
-    if (selectedCollection.address === '' || !selectedCollection.address) return // ignore the first render
+    if (!selectedCollection) return // ignore the first render
+    console.log(selectedCollection)
 
     async function getNewListings() {
       try {

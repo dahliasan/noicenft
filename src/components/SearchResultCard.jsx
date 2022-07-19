@@ -23,7 +23,7 @@ export default function SearchResultCard(props) {
         background: 'yellow',
       }}
       onClick={() => {
-        handleClick(name, address)
+        handleClick(collection)
       }}
     >
       <HStack spacing="2">
