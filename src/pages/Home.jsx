@@ -1,99 +1,71 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-// import { nanoid } from 'nanoid'
+// TODO:
+// Change listing feed component to a single listing card - make the card a drawer
+
+import { useState, useEffect, useMemo } from 'react'
 import useApi from '../hooks/useApi'
 import SearchBar from '../components/SearchBar'
+
+import ListingCard from '../components/ListingCard'
+
+import {
+  Container,
+  Box,
+  Center,
+  Spinner,
+  Flex,
+  VStack,
+  Text,
+  Heading,
+} from '@chakra-ui/react'
 import { nanoid } from 'nanoid'
-import { resolveUrl, shortenString } from '../utils/helperFunctions.jsx'
-import TimeAgo from 'timeago-react'
 
 export default function Home() {
   const [query, setQuery] = useState('')
-  const [selectedCollection, setSelectedCollection] = useState({
-    name: '',
-    address: '',
-  })
+  const [selectedCollection, setSelectedCollection] = useState()
   const { loading, error, data } = useApi(query, selectedCollection)
   const { search, newListings } = data || {}
 
-  function handleSearchClick(name, contractAddress) {
-    console.log(`--- collection ${name} ${contractAddress} is selected!`)
-    setSelectedCollection({ name: name, address: contractAddress })
+  function handleSearchClick(collection) {
+    console.log(
+      `--- collection ${collection.name} ${collection.address} is selected!`
+    )
+    setSelectedCollection(collection)
     setQuery('')
   }
 
-  function renderListings() {
-    const { collection, count, listings, error } = newListings
-
-    // get nft html
-    const listingsHtml = listings.map((item) => {
-      const {
-        tokenId,
-        eventTimestamp,
-        image_url,
-        permalink,
-        price,
-        priceInUSD,
-        priceSymbol,
-        details,
-      } = item || {}
-
-      const attributes = details.token.attributes
-
-      const attributesHtml = attributes?.map((item) => {
-        let { traitType, value } = item || {}
-
-        value = shortenString(value)
-
-        return (
-          <div key={nanoid()} className="nft-card--trait">
-            <div>{traitType}</div>
-            <div className="trait--value">{value}</div>
-          </div>
-        )
-      })
-
-      return (
-        <div key={nanoid()} className="nft-card--container">
-          <div className="nft-card--image-container">
-            <div className="nft-card--image">{resolveUrl(image_url)}</div>
-            <div className="nft-card--tokenId">{'#' + tokenId}</div>
-            <div className="nft-card--image-overlay">{attributesHtml}</div>
-          </div>
-
-          <div>{`${price} ${priceSymbol} ($${parseInt(priceInUSD)})`}</div>
-          <div>
-            Listed <TimeAgo datetime={`${eventTimestamp}Z`} />
-          </div>
-          <a href={permalink} target="_blank">
-            Buy on OpenSea
-          </a>
-        </div>
-      )
-    })
-
-    return (
-      <>
-        <div className="collection-nfts--container">{listingsHtml}</div>
-      </>
-    )
-  }
-
   return (
-    <>
-      <SearchBar
-        query={query}
-        handleChange={(e) => setQuery(e.target.value)}
-        searchResults={search}
-        handleClick={handleSearchClick}
-        loading={loading.search}
-      />
+    <Container maxW="container.xl">
+      <VStack my={10} spacing={4}>
+        <Heading textAlign="center">
+          Snipe the latest listings on OpenSea
+        </Heading>
+        <SearchBar
+          query={query}
+          handleChange={(e) => setQuery(e.target.value)}
+          searchResults={search}
+          handleClick={handleSearchClick}
+          loading={loading.search || loading?.listings}
+        />
+      </VStack>
 
-      <div className="listings--container">
-        {loading?.listings && <div>loading...</div>}
-        {newListings && renderListings()}
-      </div>
+      <VStack padding={10} alignItems="flex-start">
+        {selectedCollection && (
+          <Heading>New listings for {selectedCollection.name}</Heading>
+        )}
+        <Flex wrap="wrap" gap={5}>
+          {newListings?.listings?.map((item) => {
+            return (
+              <ListingCard
+                key={nanoid()}
+                data={item}
+                totalSupply={selectedCollection.totalSupply}
+              />
+            )
+          })}
+        </Flex>
+      </VStack>
 
       {error && <div>error!</div>}
-    </>
+    </Container>
   )
 }

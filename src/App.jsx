@@ -1,21 +1,19 @@
 import { React } from 'react'
-import './styles.css'
+// import './assets/styles.css'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import { Routes, Route } from 'react-router-dom'
 
+// TODO:
 // allow fetch api to refresh every 5 min
-// fetch estimated token value
-// style UI with chakra?
-//
 
 function App() {
   return (
     <div className="App">
-      <Navbar />
+      {/* <Navbar /> */}
       <main>
         <Routes>
-          <Route exact path="/nft-flipper-helper" element={<Home />} />
+          <Route exact path="/" element={<Home />} />
         </Routes>
       </main>
     </div>

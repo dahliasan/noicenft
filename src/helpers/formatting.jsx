@@ -13,23 +13,20 @@ export function resolveUrl(url) {
   url = url.replace('storage.opensea.io', 'openseauserdata.com')
 
   if (isIpfs) {
-    html = (
-      <img src={ipfsGatewayTools.convertToDesiredGateway(url, ipfsGateway)} />
-    )
+    return ipfsGatewayTools.convertToDesiredGateway(url, ipfsGateway)
   } else if (isSvg) {
     try {
       let svg = url
       let blob = new Blob([svg], { type: 'image/svg+xml' })
       let svgUrl = URL.createObjectURL(blob)
-      html = <img src={svgUrl} />
+
+      return svgUrl
     } catch (err) {
       console.log(err)
     }
   } else {
-    html = <img src={url} />
+    return url
   }
-
-  return html
 }
 
 export function shortenAddress(str, startLength = 6, endLength = 4) {
@@ -57,4 +54,8 @@ export function shortenString(value) {
     value = shortenAddress(value, 4, 2)
   }
   return value
+}
+
+export function parseDecimals(value, base = 18, decimals = 2) {
+  return (value / 10 ** base).toFixed(decimals)
 }

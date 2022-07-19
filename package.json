@@ -1,5 +1,5 @@
 {
-  "name": "npm",
+  "name": "forflips",
   "private": true,
   "version": "0.0.0",
   "scripts": {
@@ -9,10 +9,16 @@
   },
   "dependencies": {
     "@babel/preset-env": "^7.18.6",
+    "@chakra-ui/icons": "^2.0.4",
+    "@chakra-ui/react": "^2.2.4",
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@fontsource/jua": "^4.5.9",
     "@pinata/ipfs-gateway-tools": "^1.3.0",
     "@zoralabs/zdk": "^2.1.3",
     "axios": "^0.27.2",
     "dayjs": "^1.11.3",
+    "framer-motion": "^6.5.1",
     "lodash.debounce": "^4.0.8",
     "moralis": "^1.8.1",
     "nanoid": "^4.0.0",

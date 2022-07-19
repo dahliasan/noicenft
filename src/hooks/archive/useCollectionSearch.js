@@ -9,7 +9,7 @@ import {
   createCollectionInfoConfig,
   getTokenMetadataApi,
   normaliseNftData,
-} from '../utils/api.js'
+} from '../../utils/api.js'
 
 export default function useCollectionSearch(
   query,
