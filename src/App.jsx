@@ -13,7 +13,8 @@ function App() {
       {/* <Navbar /> */}
       <main>
         <Routes>
-          <Route exact path="/" element={<Home />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/nft-flipper-helper" element={<Home />} />
         </Routes>
       </main>
     </div>
