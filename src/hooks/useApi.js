@@ -101,33 +101,33 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
           }
         })
 
-        // Get collection stats
-        const slug = listingsData.collection
-        console.log('fetching collection stats...')
-        const [traitFloorPrices, smartFloorPrice, salesStats] =
-          await Promise.all([
-            getTraitFloorPricesApi(slug),
-            getContractSmartFloorPriceApi(contractAddress),
-            getContractSalesStatsApi(contractAddress),
-          ])
-        const collectionStats = {
-          traitFloorPrices,
-          smartFloorPrice: smartFloorPrice.data,
-          salesStats: salesStats.statstics,
-        }
+        // // Get collection stats
+        // const slug = listingsData.collection
+        // console.log('fetching collection stats...')
+        // const [traitFloorPrices, smartFloorPrice, salesStats] =
+        //   await Promise.all([
+        //     getTraitFloorPricesApi(slug),
+        //     getContractSmartFloorPriceApi(contractAddress),
+        //     getContractSalesStatsApi(contractAddress),
+        //   ])
+        // const collectionStats = {
+        //   traitFloorPrices,
+        //   smartFloorPrice: smartFloorPrice.data,
+        //   salesStats: salesStats.statstics,
+        // }
 
-        console.log('collection stats -- ', collectionStats)
+        // console.log('collection stats -- ', collectionStats)
 
-        // Get collection insights
-        const collectionInsights = await getContractInsightsApi(contractAddress)
-        console.log('collection insights -- ', collectionInsights)
+        // // Get collection insights
+        // const collectionInsights = await getContractInsightsApi(contractAddress)
+        // console.log('collection insights -- ', collectionInsights)
 
         // Set data state
         setData((prev) => ({
           ...prev,
           newListings: { ...listingsData, listings: newListingsArray },
-          collectionStats: collectionStats,
-          collectionInsights: collectionInsights,
+          // collectionStats: collectionStats,
+          // collectionInsights: collectionInsights,
         }))
       } catch (err) {
         console.log(err)
