@@ -104,6 +104,10 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
           ...prev,
           newListings: { ...listingsData, listings: newListingsArray },
         }))
+
+        let slug = listingsData.collection
+
+        return { contractAddress, slug }
       } catch (err) {
         console.log(err)
         setError(true)
@@ -112,7 +116,41 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
       }
     }
 
-    getNewListings()
+    async function getCollectionStats(contractAddress, slug) {
+      try {
+        // Get collection stats
+        console.log('fetching collection stats...')
+
+        const [traitFloorPrices, smartFloorPrice, salesStats] =
+          await Promise.all([
+            getTraitFloorPricesApi(slug),
+            getContractSmartFloorPriceApi(contractAddress),
+            getContractSalesStatsApi(contractAddress),
+          ])
+        const collectionStats = {
+          traitFloorPrices,
+          smartFloorPrice: smartFloorPrice.data,
+          salesStats: salesStats?.statstics,
+        }
+        console.log('collection stats -- ', collectionStats)
+
+        // Get collection insights
+        const collectionInsights = await getContractInsightsApi(contractAddress)
+        console.log('collection insights -- ', collectionInsights)
+
+        setData((prev) => ({
+          ...prev,
+          collectionStats: collectionStats,
+          collectionInsights: collectionInsights,
+        }))
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+    getNewListings().then((res) => {
+      getCollectionStats(res.contractAddress, res.slug)
+    })
 
     const interval = setInterval(() => {
       getNewListings()
@@ -125,60 +163,30 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
   }, [selectedCollection])
 
   // Fetch trending collections using rarify API
-  useEffect(() => {
-    async function getTrendingCollections() {
-      try {
-        setLoading((prev) => ({ ...prev, trending: true }))
-        const params = {
-          'insights_trends.period': '24h',
-          include: 'insights_trends',
-          sort: '-insights_trends.volume_change_percent',
-          'page[limit]': 10,
-        }
+  // useEffect(() => {
+  //   async function getTrendingCollections() {
+  //     try {
+  //       setLoading((prev) => ({ ...prev, trending: true }))
+  //       const params = {
+  //         'insights_trends.period': '24h',
+  //         include: 'insights_trends',
+  //         sort: '-insights_trends.volume_change_percent',
+  //         'page[limit]': 10,
+  //       }
 
-        const data = await getContractApi('', params)
-        console.log('trending collections -- ', data)
+  //       const data = await getContractApi('', params)
+  //       console.log('trending collections -- ', data)
 
-        setData((prev) => ({ ...prev, trendingCollections: data }))
-      } catch (err) {
-        console.log(err)
-      } finally {
-        setLoading((prev) => ({ ...prev, trending: false }))
-      }
-    }
+  //       setData((prev) => ({ ...prev, trendingCollections: data }))
+  //     } catch (err) {
+  //       console.log(err)
+  //     } finally {
+  //       setLoading((prev) => ({ ...prev, trending: false }))
+  //     }
+  //   }
 
-    getTrendingCollections()
-  }, [])
+  //   getTrendingCollections()
+  // }, [])
 
   return { data, loading, error }
-}
-
-async function getCollectionStats(contractAddress, slug) {
-  try {
-    // Get collection stats
-    console.log('fetching collection stats...')
-    const [traitFloorPrices, smartFloorPrice, salesStats] = await Promise.all([
-      getTraitFloorPricesApi(slug),
-      getContractSmartFloorPriceApi(contractAddress),
-      getContractSalesStatsApi(contractAddress),
-    ])
-    const collectionStats = {
-      traitFloorPrices,
-      smartFloorPrice: smartFloorPrice.data,
-      salesStats: salesStats.statstics,
-    }
-    console.log('collection stats -- ', collectionStats)
-
-    // Get collection insights
-    const collectionInsights = await getContractInsightsApi(contractAddress)
-    console.log('collection insights -- ', collectionInsights)
-
-    setData((prev) => ({
-      ...prev,
-      collectionStats: collectionStats,
-      collectionInsights: collectionInsights,
-    }))
-  } catch (err) {
-    console.log(err)
-  }
 }

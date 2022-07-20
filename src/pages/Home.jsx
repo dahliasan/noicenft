@@ -4,8 +4,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import useApi from '../hooks/useApi'
 import SearchBar from '../components/SearchBar'
-
 import ListingCard from '../components/ListingCard'
+import CollectionInfo from '../components/CollectionInfo'
 
 import {
   Container,
@@ -19,6 +19,8 @@ import {
   Heading,
   Grid,
   GridItem,
+  AvatarBadge,
+  Avatar,
 } from '@chakra-ui/react'
 import { nanoid } from 'nanoid'
 
@@ -27,6 +29,8 @@ export default function Home() {
   const [selectedCollection, setSelectedCollection] = useState()
   const { loading, error, data } = useApi(query, selectedCollection)
   const { search, newListings } = data || {}
+
+  console.log(data)
 
   function handleSearchClick(collection) {
     console.log(
@@ -39,7 +43,7 @@ export default function Home() {
   return (
     <Container maxW="container.xl">
       <VStack mt={10} mb={4} spacing={4}>
-        <Heading textAlign="center">
+        <Heading as="h1" textAlign="center">
           Snipe the latest listings on OpenSea
         </Heading>
         <SearchBar
@@ -51,29 +55,33 @@ export default function Home() {
         />
       </VStack>
 
-      <VStack px={4} alignItems="flex-start">
-        {selectedCollection && (
-          <Box>
-            <Heading>New listings for {selectedCollection.name}</Heading>
-            <Text fontSize="sm">{`(auto refreshes every 5 min)`}</Text>
-          </Box>
-        )}
-        <Grid
-          templateColumns="repeat(auto-fit, minmax(12rem, 1fr))"
-          gap={4}
-          // autoColumns="min-content"
-        >
-          {newListings?.listings?.map((item) => {
-            return (
-              <ListingCard
-                key={nanoid()}
-                data={item}
-                totalSupply={selectedCollection.totalSupply}
-              />
-            )
-          })}
-        </Grid>
-      </VStack>
+      {data.collectionStats && (
+        <CollectionInfo data={data} selectedCollection={selectedCollection} />
+      )}
+
+      {selectedCollection && (
+        <Box>
+          <Heading as="h2" size="lg">
+            New listings for {selectedCollection.name}
+          </Heading>
+          <Text fontSize="sm">{`(auto refreshes every 5 min)`}</Text>
+        </Box>
+      )}
+      <Grid
+        templateColumns="repeat(auto-fit, minmax(13rem, 1fr))"
+        gap={4}
+        my={4}
+      >
+        {newListings?.listings?.map((item) => {
+          return (
+            <ListingCard
+              key={nanoid()}
+              data={item}
+              totalSupply={selectedCollection.totalSupply}
+            />
+          )
+        })}
+      </Grid>
 
       {error && <div>error!</div>}
     </Container>

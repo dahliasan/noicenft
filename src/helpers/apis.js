@@ -59,14 +59,18 @@ export async function getContractInsightsApi(
   contractAddress,
   period = 'all_time'
 ) {
-  const config = {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-    url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/insights/${period}`,
+  try {
+    const config = {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
+      url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/insights/${period}`,
+    }
+    const data = await axios(config).then((res) => res.data)
+    return data
+  } catch (err) {
+    console.log(err)
+    return null
   }
-  const data = await axios(config).then((res) => res.data)
-  console.log('contract insights -- ', data)
-  return data
 }
 
 export async function getContractWhalesApi(contractAddress) {
@@ -252,6 +256,7 @@ export async function getTraitFloorPricesApi(slug) {
     return data
   } catch (err) {
     console.log(err)
+    return null
   }
 }
 
@@ -274,5 +279,6 @@ export async function getContractSalesStatsApi(contractAddress) {
     return data
   } catch (err) {
     console.log(err)
+    return null
   }
 }

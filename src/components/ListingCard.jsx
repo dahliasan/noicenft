@@ -101,8 +101,6 @@ export default function ListingCard({ data, totalSupply }) {
           borderRadius="10px"
           p={3}
           gap={2}
-          // maxW="15rem"
-          // flex="1 1"
           bg={isOpen ? 'yellow' : 'white'}
           onClick={() => handleClick(tokenId)}
         >
@@ -111,7 +109,7 @@ export default function ListingCard({ data, totalSupply }) {
             alt={`${collection} token id ${tokenId} nft`}
             objectFit="cover"
             rounded="xl"
-            // maxH="15rem"
+            // sx={{ 'aspect-ratio': '1/ 1' }}
           />
 
           <HStack alignItems="flex-start" wrap="wrap" gapy={1}>
@@ -136,7 +134,7 @@ export default function ListingCard({ data, totalSupply }) {
             <Text fontSize="sm">{priceInUSD_formatted}</Text>
           </HStack>
 
-          <Button whitespace="normal">
+          <Button whiteSpace="normal">
             <Link
               href={permalink}
               _hover={{

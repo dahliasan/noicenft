@@ -8,7 +8,7 @@ import '@fontsource/jua'
 const theme = extendTheme({
   colors: {
     black: '#011627',
-    white: '#fffffc',
+    white: '#fefefe',
     special:
       'linear-gradient(191deg, rgba(63,244,251,1) 0%, rgba(255,42,168,1) 100%);',
   },

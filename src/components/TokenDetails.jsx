@@ -75,7 +75,9 @@ export default function TokenDetails({ data, basicInfo }) {
             </Tooltip>
             {info.assets_lowest_rank[0] && (
               <Tooltip
-                label={`Rarest ranked token for sale with this trait is ${info.assets_lowest_rank[0].rank} @ ${info.assets_lowest_rank[0].price}`}
+                label={`Rarest token listed with this trait is rank ${
+                  info.assets_lowest_rank[0].rank
+                } @ ${parseHex(info.assets_lowest_rank[0].price, 18, 0)}Ξ`}
               >
                 <Text fontSize="sm" color="gray.500" noOfLines={1}>
                   Rarest rank listed:{' '}
