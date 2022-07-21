@@ -42,11 +42,15 @@ export async function getContractApi(
 }
 
 export async function getContractSmartFloorPriceApi(contractAddress) {
+  // `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/smart-floor-price`,
   try {
     const config = {
       method: 'GET',
       headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-      url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/smart-floor-price`,
+      url: `http://localhost:8000/smart-floor-price`,
+      params: {
+        contractAddress: contractAddress,
+      },
     }
     const data = await axios(config).then((res) => res.data)
     return data

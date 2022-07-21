@@ -121,16 +121,13 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
         // Get collection stats
         console.log('fetching collection stats...')
 
-        const [traitFloorPrices, smartFloorPrice, salesStats] =
-          await Promise.all([
-            getTraitFloorPricesApi(slug),
-            getContractSmartFloorPriceApi(contractAddress),
-            getContractSalesStatsApi(contractAddress),
-          ])
+        const [smartFloorPrice, salesStats] = await Promise.all([
+          getContractSmartFloorPriceApi(contractAddress),
+          getContractSalesStatsApi(contractAddress),
+        ])
         const collectionStats = {
-          traitFloorPrices,
           smartFloorPrice: smartFloorPrice.data,
-          salesStats: salesStats?.statstics,
+          salesStats: salesStats?.statistics,
         }
         console.log('collection stats -- ', collectionStats)
 
