@@ -5,7 +5,7 @@ import Home from './pages/Home'
 import { Routes, Route } from 'react-router-dom'
 
 // TODO:
-// allow fetch api to refresh every 5 min
+// - if listed price is < highest trait floor price = it's the cheapest price (floor nft) for all traits.
 
 function App() {
   return (

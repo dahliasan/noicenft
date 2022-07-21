@@ -45,6 +45,67 @@ export default function CollectionInfo({ data, selectedCollection }) {
 
     console.log(traitFloorPrices, insightsOverview, insightsHistory)
 
+    // Prepare historical data for plotting
+    let historicalData = []
+    insightsHistory.history.map((row) => {
+      historicalData.push({
+        ...row,
+        avg_price: Number(parseHex(row.avg_price)),
+        max_price: Number(parseHex(row.max_price)),
+        min_price: Number(parseHex(row.min_price)),
+        time: new Date(row.time),
+        volume: parseHex(row.volume),
+      })
+    })
+
+    console.log(historicalData)
+
+    const AvgPriceChart = () => {
+      //     const [selectedDomain, setSelectedDomain] = useState('')
+      //     const [zoomDomain, setZoomDomain] = useState('')
+
+      //     function handleZoom(domain) {
+      //   setSelectedDomain(domain)
+      // }
+
+      // function handleBrush(domain) {
+      //   setZoomDomain(domain)
+      // }
+
+      return (
+        <VictoryChart
+          containerComponent={
+            <VictoryZoomContainer
+            // responsive={false}
+            // zoomDimension="x"
+            // zoomDomain={zoomDomain}
+            // onZoomDomainChange={handleZoom.bind(this)}
+            />
+          }
+        >
+          <VictoryArea
+            style={{
+              data: { fill: 'gray' },
+            }}
+            data={historicalData}
+            x="time"
+            y="min_price"
+            y0="max_price"
+          />
+
+          <VictoryLine
+            style={{
+              data: { stroke: 'black' },
+              parent: { border: '1px solid black' },
+            }}
+            data={historicalData}
+            x="time"
+            y="avg_price"
+          />
+        </VictoryChart>
+      )
+    }
+
     function EthIcon2() {
       return (
         <Tooltip label="eth">
@@ -95,7 +156,7 @@ export default function CollectionInfo({ data, selectedCollection }) {
 
           <Flex p={2} gap={4} wrap="wrap">
             <MyStat
-              label="floor price"
+              label="smart floor price"
               showInfoIcon="true"
               showEthIcon="true"
               tooltipLabel="estimated min price NFT will sell for calculated by an algorithm that ignores outliers and wash trading amongst other factors"
@@ -122,6 +183,7 @@ export default function CollectionInfo({ data, selectedCollection }) {
 
             <MyStat label="unique buyers">{unique_buyers}</MyStat>
           </Flex>
+          <AvgPriceChart />
         </Flex>
       </Box>
     )

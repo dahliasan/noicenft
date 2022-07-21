@@ -27,8 +27,10 @@
     "react-moralis": "^1.4.0",
     "react-router-dom": "^6.3.0",
     "react-select": "^5.4.0",
+    "reaviz": "^13.1.5",
     "timeago-react": "^3.0.5",
     "timeago.js": "^4.0.2",
+    "victory": "^36.5.3",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
