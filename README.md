@@ -1,6 +1,6 @@
 # NFT Flipper Helper
 
-👀 View live [demo](https://dahliasan.github.io/nft-flipper-helper/)
+👀 View live [demo](https://noicenft.vercel.app)
 
 This is a project I'm working on for the [buildspace Nights and Weekends 6-week program](https://twitter.com/_buildspace/status/1526672744053542912).
 
