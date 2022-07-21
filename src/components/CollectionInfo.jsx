@@ -10,6 +10,14 @@ import {
   StatGroup,
 } from '@chakra-ui/react'
 
+import {
+  VictoryChart,
+  VictoryLine,
+  VictoryTheme,
+  VictoryArea,
+  VictoryZoomContainer,
+} from 'victory'
+
 import { InfoIcon } from '@chakra-ui/icons'
 import { EthIcon } from '../assets/myIcons'
 
