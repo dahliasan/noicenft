@@ -1,6 +1,3 @@
-// TODO:
-// Change listing feed component to a single listing card - make the card a drawer
-
 import { useState, useEffect, useMemo } from 'react'
 import useApi from '../hooks/useApi'
 import SearchBar from '../components/SearchBar'

@@ -11,11 +11,13 @@ app.use(
   })
 )
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
+  res.setHeader('Content-Type', 'text/html')
+  res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate')
   res.send('hi wyd')
 })
 
-app.get('/smart-floor-price', (req, res) => {
+app.get('/api/smart-floor-price', (req, res) => {
   async function getContractSmartFloorPriceApi(contractAddress) {
     try {
       const config = {
@@ -37,7 +39,7 @@ app.get('/smart-floor-price', (req, res) => {
   getContractSmartFloorPriceApi(contractAddress)
 })
 
-app.get('/contract-sales-stats', (req, res) => {
+app.get('/api/contract-sales-stats', (req, res) => {
   async function getContractSalesStatsApi(contractAddress) {
     try {
       const config = {
