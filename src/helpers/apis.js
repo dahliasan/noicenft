@@ -103,7 +103,6 @@ export async function getContractWhalesApi(contractAddress) {
 
 // Zora API --------------------------------
 import { ZDK, ZDKNetwork, ZDKChain } from '@zoralabs/zdk'
-import { all } from '../../api'
 
 export async function getZDKApi(tokenIdsArray, contractAddress) {
   try {
