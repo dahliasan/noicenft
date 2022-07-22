@@ -191,7 +191,7 @@ export default function CollectionInfo({ data, selectedCollection }) {
 
             <MyStat label="unique buyers">{unique_buyers}</MyStat>
           </Flex>
-          <AvgPriceChart />
+          {/* <AvgPriceChart /> */}
         </Flex>
       </Box>
     )
