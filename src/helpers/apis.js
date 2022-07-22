@@ -47,7 +47,7 @@ export async function getContractSmartFloorPriceApi(contractAddress) {
     const config = {
       method: 'GET',
       // headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-      url: `http://localhost:8000/api/smart-floor-price`,
+      url: `https://noicenft.vercel.app/api/smart-floor-price`,
       params: {
         contractAddress: contractAddress,
       },
@@ -271,7 +271,7 @@ export async function getContractSalesStatsApi(contractAddress) {
     // url: `https://api.nftport.xyz/v0/transactions/stats/${contractAddress}`,
     const config = {
       method: 'GET',
-      url: `http://localhost:8000/api/contract-sales-stats/`,
+      url: `https://noicenft.vercel.app/api/contract-sales-stats/`,
       params: {
         chain: 'ethereum',
         contractAddress: contractAddress,
