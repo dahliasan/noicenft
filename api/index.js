@@ -30,14 +30,12 @@ app.get('/api/smart-floor-price', (req, res) => {
       const data = await axios(config).then((res) => res.data)
 
       res.json(data)
-      //   return data
     } catch (err) {
       console.log(err)
     }
   }
 
   let contractAddress = req.query.contractAddress
-  // res.send(contractAddress)
   getContractSmartFloorPriceApi(contractAddress)
 })
 
@@ -58,7 +56,10 @@ app.get('/api/contract-insights', (req, res) => {
   }
 
   let contractAddress = req.query.contractAddress
-  getContractInsightsApi(contractAddress)
+  let period = req.query.period
+  period
+    ? getContractInsightsApi(contractAddress, period)
+    : getContractInsightsApi(contractAddress)
 })
 
 app.get('/api/contract-whales', (req, res) => {
@@ -107,7 +108,6 @@ app.get('/api/contract-sales-stats', (req, res) => {
   }
 
   let contractAddress = req.query.contractAddress
-  // res.send(contractAddress)
   getContractSalesStatsApi(contractAddress)
 })
 
