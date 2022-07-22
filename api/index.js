@@ -27,7 +27,6 @@ app.get('/api/smart-floor-price', (req, res) => {
       }
       const data = await axios(config).then((res) => res.data)
 
-      //   console.log(data)
       res.json(data)
       //   return data
     } catch (err) {
@@ -36,7 +35,8 @@ app.get('/api/smart-floor-price', (req, res) => {
   }
 
   let contractAddress = req.query.contractAddress
-  getContractSmartFloorPriceApi(contractAddress)
+  res.send(contractAddress)
+  // getContractSmartFloorPriceApi(contractAddress)
 })
 
 app.get('/api/contract-sales-stats', (req, res) => {
@@ -62,7 +62,8 @@ app.get('/api/contract-sales-stats', (req, res) => {
   }
 
   let contractAddress = req.query.contractAddress
-  getContractSalesStatsApi(contractAddress)
+  res.send(contractAddress)
+  // getContractSalesStatsApi(contractAddress)
 })
 
 app.listen(PORT, () => console.log('server is running on port ' + PORT))
