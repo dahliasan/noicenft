@@ -64,3 +64,5 @@ app.get('/contract-sales-stats', (req, res) => {
 })
 
 app.listen(PORT, () => console.log('server is running on port ' + PORT))
+
+module.exports = app
