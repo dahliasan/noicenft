@@ -17,6 +17,7 @@ app.get('/api', (req, res) => {
   res.send('hi wyd')
 })
 
+// RARIFY API -----------------------------
 app.get('/api/smart-floor-price', (req, res) => {
   async function getContractSmartFloorPriceApi(contractAddress) {
     try {
@@ -39,6 +40,48 @@ app.get('/api/smart-floor-price', (req, res) => {
   // res.send(contractAddress)
   getContractSmartFloorPriceApi(contractAddress)
 })
+
+app.get('/api/contract-insights', (req, res) => {
+  async function getContractInsightsApi(contractAddress, period = 'all_time') {
+    try {
+      const config = {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${process.env.VITE_RARIFY_API_KEY}` },
+        url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/insights/${period}`,
+      }
+      const data = await axios(config).then((res) => res.data)
+      res.json(data)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  let contractAddress = req.query.contractAddress
+  getContractInsightsApi(contractAddress)
+})
+
+app.get('/api/contract-whales', (req, res) => {
+  async function getContractWhalesApi(contractAddress) {
+    try {
+      const config = {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${process.env.VITE_RARIFY_API_KEY}` },
+        url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/whales/`,
+      }
+
+      const data = await axios(config).then((res) => res.data)
+      res.json(data)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  let contractAddress = req.query.contractAddress
+  getContractWhalesApi(contractAddress)
+})
+
+// NFTPORT API --------------------------------
 
 app.get('/api/contract-sales-stats', (req, res) => {
   async function getContractSalesStatsApi(contractAddress) {

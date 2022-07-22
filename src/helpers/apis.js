@@ -64,10 +64,15 @@ export async function getContractInsightsApi(
   period = 'all_time'
 ) {
   try {
+    // https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/insights/${period}
     const config = {
       method: 'GET',
-      headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-      url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/insights/${period}`,
+      // headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
+      url: `https://noicenft.vercel.app/api/contract-insights`,
+      params: {
+        contractAddress: contractAddress,
+        period: period,
+      },
     }
     const data = await axios(config).then((res) => res.data)
     return data
@@ -78,18 +83,27 @@ export async function getContractInsightsApi(
 }
 
 export async function getContractWhalesApi(contractAddress) {
-  const config = {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-    url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/whales/`,
+  try {
+    // https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/whales/
+    const config = {
+      method: 'GET',
+      // headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
+      url: `https://noicenft.vercel.app/api/contract-whales`,
+      params: {
+        contractAddress: contractAddress,
+      },
+    }
+    const data = await axios(config).then((res) => res.data)
+    console.log('contract whales -- ', data)
+    return data
+  } catch (err) {
+    console.log(err)
   }
-  const data = await axios(config).then((res) => res.data)
-  console.log('contract whales -- ', data)
-  return data
 }
 
 // Zora API --------------------------------
 import { ZDK, ZDKNetwork, ZDKChain } from '@zoralabs/zdk'
+import { all } from '../../api'
 
 export async function getZDKApi(tokenIdsArray, contractAddress) {
   try {
