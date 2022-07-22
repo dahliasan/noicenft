@@ -20,6 +20,7 @@ app.get('/api', (req, res) => {
 app.get('/api/smart-floor-price', (req, res) => {
   async function getContractSmartFloorPriceApi(contractAddress) {
     try {
+      console.log('fetching floor price...')
       const config = {
         method: 'GET',
         headers: { Authorization: `Bearer ${process.env.VITE_RARIFY_API_KEY}` },
@@ -35,13 +36,14 @@ app.get('/api/smart-floor-price', (req, res) => {
   }
 
   let contractAddress = req.query.contractAddress
-  res.send(contractAddress)
-  // getContractSmartFloorPriceApi(contractAddress)
+  // res.send(contractAddress)
+  getContractSmartFloorPriceApi(contractAddress)
 })
 
 app.get('/api/contract-sales-stats', (req, res) => {
   async function getContractSalesStatsApi(contractAddress) {
     try {
+      console.log('fetching contact sales stats...')
       const config = {
         method: 'GET',
         url: `https://api.nftport.xyz/v0/transactions/stats/${contractAddress}`,
@@ -62,8 +64,8 @@ app.get('/api/contract-sales-stats', (req, res) => {
   }
 
   let contractAddress = req.query.contractAddress
-  res.send(contractAddress)
-  // getContractSalesStatsApi(contractAddress)
+  // res.send(contractAddress)
+  getContractSalesStatsApi(contractAddress)
 })
 
 app.listen(PORT, () => console.log('server is running on port ' + PORT))
