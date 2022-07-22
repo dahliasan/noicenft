@@ -46,7 +46,7 @@ export async function getContractSmartFloorPriceApi(contractAddress) {
   try {
     const config = {
       method: 'GET',
-      headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
+      // headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
       url: `http://localhost:8000/smart-floor-price`,
       params: {
         contractAddress: contractAddress,
@@ -268,13 +268,17 @@ export async function getTraitFloorPricesApi(slug) {
 
 export async function getContractSalesStatsApi(contractAddress) {
   try {
+    // url: `https://api.nftport.xyz/v0/transactions/stats/${contractAddress}`,
     const config = {
       method: 'GET',
-      url: `https://api.nftport.xyz/v0/transactions/stats/${contractAddress}`,
-      params: { chain: 'ethereum' },
+      url: `http://localhost:8000/contract-sales-stats/`,
+      params: {
+        chain: 'ethereum',
+        contractAddress: contractAddress,
+      },
       headers: {
         'Content-Type': 'application/json',
-        Authorization: API_KEYS.nftport,
+        // Authorization: API_KEYS.nftport,
       },
     }
 

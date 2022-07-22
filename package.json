@@ -1,9 +1,9 @@
 {
-  "name": "forflips",
+  "name": "noicenft",
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "start:backend": "nodemon server.js",
+    "start:backend": "nodemon index.js",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
