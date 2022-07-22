@@ -42,11 +42,15 @@ export async function getContractApi(
 }
 
 export async function getContractSmartFloorPriceApi(contractAddress) {
+  // `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/smart-floor-price`,
   try {
     const config = {
       method: 'GET',
-      headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
-      url: `https://api.rarify.tech/data/contracts/ethereum:${contractAddress}/smart-floor-price`,
+      // headers: { Authorization: `Bearer ${API_KEYS.rarify}` },
+      url: `https://noicenft.vercel.app/api/smart-floor-price`,
+      params: {
+        contractAddress: contractAddress,
+      },
     }
     const data = await axios(config).then((res) => res.data)
     return data
@@ -264,13 +268,17 @@ export async function getTraitFloorPricesApi(slug) {
 
 export async function getContractSalesStatsApi(contractAddress) {
   try {
+    // url: `https://api.nftport.xyz/v0/transactions/stats/${contractAddress}`,
     const config = {
       method: 'GET',
-      url: `https://api.nftport.xyz/v0/transactions/stats/${contractAddress}`,
-      params: { chain: 'ethereum' },
+      url: `https://noicenft.vercel.app/api/contract-sales-stats/`,
+      params: {
+        chain: 'ethereum',
+        contractAddress: contractAddress,
+      },
       headers: {
         'Content-Type': 'application/json',
-        Authorization: API_KEYS.nftport,
+        // Authorization: API_KEYS.nftport,
       },
     }
 
