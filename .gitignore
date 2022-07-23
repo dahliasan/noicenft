@@ -1,5 +1,4 @@
 node_modules
 .env
 .vercel
-notes.md
-DS_STORE
+.DS_STORE
