@@ -242,7 +242,9 @@ function MyStat(props) {
   return (
     <Flex direction="column" bg="gray.100" p={2} borderRadius="10px">
       <Flex align="baseline">
-        <Text fontSize="sm">{props.label}</Text>
+        <Text textTransform="uppercase" letterSpacing=".5px" fontSize="sm">
+          {props.label}
+        </Text>
         {props.showInfoIcon && (
           <Tooltip label={props.tooltipLabel}>
             <InfoIcon boxSize={'.7rem'} mx={2} />
@@ -319,8 +321,10 @@ function MyGroupStatV2(props) {
   return (
     <Flex direction="column" bg="gray.100" p={2} borderRadius="10px" gap={1}>
       <Flex align="baseline" gap={2}>
-        <Text fontSize="sm">{props.label}</Text>
-        {props.showEthIcon && <EthIcon2 size={2.5} />}
+        <Text textTransform="uppercase" letterSpacing=".5px" fontSize="sm">
+          {props.label}
+        </Text>
+        {props.showEthIcon && <EthIcon2 size={3} />}
 
         {props.showInfoIcon && (
           <Tooltip label={props.tooltipLabel}>
@@ -352,9 +356,9 @@ function MyGroupStatV2(props) {
                   {period.change && (
                     <Tooltip label={`change = ${formatNumber(period.change)}`}>
                       {period.change > 0 ? (
-                        <TriangleUpIcon boxSize={2} color="green.500" />
+                        <TriangleUpIcon boxSize={2.5} color="green.500" />
                       ) : (
-                        <TriangleDownIcon boxSize={2} color="red.500" />
+                        <TriangleDownIcon boxSize={2.5} color="red.500" />
                       )}
                     </Tooltip>
                   )}
