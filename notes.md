@@ -13,3 +13,4 @@
 - add to watchlist feture and save to localstorage
 - change search abortcontroller to debounce
 - show best offer for each token
+- allow users to filter listings by trait

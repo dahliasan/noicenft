@@ -59,3 +59,12 @@ export function shortenString(value) {
 export function parseHex(value, base = 18, decimals = 2) {
   return (value / 10 ** base).toFixed(decimals)
 }
+
+export function formatNumber(value, options = {}) {
+  return new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 1,
+    notation: 'compact',
+    compactDisplay: 'short',
+    ...options,
+  }).format(value)
+}

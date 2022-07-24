@@ -10,7 +10,7 @@ const theme = extendTheme({
     black: '#011627',
     white: '#fefefe',
     special:
-      'linear-gradient(191deg, rgba(63,244,251,1) 0%, rgba(255,42,168,1) 100%);',
+      'linear-gradient(180deg, rgba(254,185,242,1) 0%, rgba(128,253,255,1) 100%);',
   },
   fonts: {
     body: 'jua, sans-serif',
