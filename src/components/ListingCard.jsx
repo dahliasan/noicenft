@@ -51,7 +51,9 @@ export default function ListingCard({ data, totalSupply }) {
     const priceInUSD_formatted = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 1,
+      notation: 'compact',
+      compactDisplay: 'short',
     }).format(priceInUSD)
 
     function handleClick() {
@@ -102,15 +104,18 @@ export default function ListingCard({ data, totalSupply }) {
           p={3}
           gap={2}
           bg={isOpen ? 'yellow' : 'white'}
-          onClick={() => handleClick(tokenId)}
         >
-          <Image
-            src={resolveUrl(image_url)}
-            alt={`${collection} token id ${tokenId} nft`}
-            objectFit="cover"
-            rounded="xl"
-            // sx={{ 'aspect-ratio': '1/ 1' }}
-          />
+          <Tooltip label="click to view more details">
+            <Image
+              src={resolveUrl(image_url)}
+              alt={`${collection} token id ${tokenId} nft`}
+              objectFit="cover"
+              rounded="xl"
+              onClick={() => handleClick(tokenId)}
+              cursor="pointer"
+              // sx={{ 'aspect-ratio': '1/ 1' }}
+            />
+          </Tooltip>
 
           <HStack alignItems="flex-start" wrap="wrap" gapy={1}>
             <Tooltip label="token id">
