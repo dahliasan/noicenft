@@ -1,4 +1,5 @@
 import React from 'react'
+import { nanoid } from 'nanoid'
 import {
   resolveUrl,
   shortenString,
@@ -19,6 +20,14 @@ import {
 
 import { InfoIcon, TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons'
 import { EthIcon } from '../assets/myIcons'
+
+import {
+  ScatterPlot,
+  LineChart,
+  LineSeries,
+  ChartZoomPan,
+  LinearYAxis,
+} from 'reaviz'
 
 export default function CollectionInfo({ data, selectedCollection }) {
   try {
@@ -100,6 +109,53 @@ export default function CollectionInfo({ data, selectedCollection }) {
       })
     })
 
+    console.log('prepared historical data', historicalData)
+
+    let plotData = [
+      {
+        key: 'max price',
+        data: [],
+      },
+      {
+        key: 'avg price',
+        data: [],
+      },
+      {
+        key: 'min price',
+        data: [],
+      },
+    ]
+
+    historicalData.map((row) => {
+      plotData[0].data.push({
+        key: row.time,
+        data: row.max_price,
+      })
+
+      plotData[1].data.push({
+        key: row.time,
+        data: row.avg_price,
+      })
+
+      plotData[2].data.push({
+        key: row.time,
+        data: row.min_price,
+      })
+    })
+
+    console.log(plotData)
+
+    // Test Realviz package
+    const MyChart = () => (
+      <LineChart
+        height={300}
+        width={'auto'}
+        data={plotData}
+        series={<LineSeries type="grouped" />}
+        zoomPan={<ChartZoomPan />}
+      />
+    )
+
     return (
       <Box mb={'4em'}>
         <Flex direction="column" gap={4}>
@@ -110,6 +166,8 @@ export default function CollectionInfo({ data, selectedCollection }) {
               <Text>{shortenString(address)}</Text>
             </Flex>
           </Flex>
+
+          <MyChart />
 
           <Flex p={2} gap={4} wrap="wrap" alignItems="flex-start">
             <MyGroupStatV2
@@ -158,15 +216,12 @@ export default function CollectionInfo({ data, selectedCollection }) {
               statsByPeriods={[
                 {
                   value: formatNumber(one_day_average_price),
-                  change: one_day_change,
                 },
                 {
                   value: formatNumber(seven_day_average_price),
-                  change: seven_day_change,
                 },
                 {
                   value: formatNumber(thirty_day_average_price),
-                  change: thirty_day_change,
                 },
                 {
                   value: formatNumber(parseHex(avg_price, 18, 2)),
@@ -200,12 +255,15 @@ export default function CollectionInfo({ data, selectedCollection }) {
               statsByPeriods={[
                 {
                   value: formatNumber(one_day_volume),
+                  change: one_day_change,
                 },
                 {
                   value: formatNumber(seven_day_volume),
+                  change: seven_day_change,
                 },
                 {
                   value: formatNumber(thirty_day_volume),
+                  change: thirty_day_change,
                 },
                 {
                   value: formatNumber(total_volume),
@@ -290,13 +348,15 @@ function MyGroupStat(props) {
             return (
               <>
                 {period.tooltipLabel ? (
-                  <Tooltip label={period.tooltipLabel}>
+                  <Tooltip label={period.tooltipLabel} key={nanoid()}>
                     <Text fontSize="xs">{props.statLabels[index]}</Text>
                   </Tooltip>
                 ) : (
-                  <Text fontSize="xs">{props.statLabels[index]}</Text>
+                  <Text fontSize="xs" key={nanoid()}>
+                    {props.statLabels[index]}
+                  </Text>
                 )}
-                <Flex align="baseline " gap={0.5}>
+                <Flex align="baseline " gap={0.5} key={nanoid()}>
                   <Text fontSize="xs"> {period.value} </Text>
                   {period.change && (
                     <Tooltip label={`change = ${period.change}`}>
@@ -339,7 +399,7 @@ function MyGroupStatV2(props) {
             if (!period.value) return
 
             return (
-              <Flex direction="column">
+              <Flex direction="column" key={nanoid()}>
                 {period.tooltipLabel ? (
                   <Tooltip label={period.tooltipLabel}>
                     <Flex alignItems="baseline" gap={1}>

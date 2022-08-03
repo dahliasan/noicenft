@@ -22,6 +22,7 @@
     "dayjs": "^1.11.3",
     "express": "^4.18.1",
     "framer-motion": "^6.5.1",
+    "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "moralis": "^1.8.1",
     "nanoid": "^4.0.0",
