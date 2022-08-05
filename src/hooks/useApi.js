@@ -64,7 +64,6 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
     // searchCollections()
 
     const debounceSearch = debounce(() => {
-      console.log('debounced')
       searchCollections()
     }, 200)
 
@@ -187,7 +186,10 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
         console.log('collection stats -- ', collectionStats)
 
         // Get collection insights
-        const collectionInsights = await getContractInsightsApi(contractAddress)
+        const collectionInsights = await getContractInsightsApi(
+          contractAddress,
+          insightsPeriod
+        )
         console.log('collection insights -- ', collectionInsights)
 
         setData((prev) => ({
@@ -213,6 +215,35 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
       abortController.abort()
     }
   }, [selectedCollection])
+
+  // Fetch selected insights period
+  useEffect(() => {
+    if (!selectedCollection) return // ignore the first render
+
+    async function fetchContractInsights() {
+      try {
+        let contractAddress = selectedCollection.address
+
+        setLoading((prev) => ({ ...prev, insights: true }))
+        // Get collection insights
+        const collectionInsights = await getContractInsightsApi(
+          contractAddress,
+          insightsPeriod
+        )
+
+        setData((prev) => ({
+          ...prev,
+          collectionInsights: collectionInsights,
+        }))
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoading((prev) => ({ ...prev, insights: false }))
+      }
+    }
+
+    fetchContractInsights()
+  }, [insightsPeriod])
 
   // Fetch trending collections using rarify API
   // useEffect(() => {
