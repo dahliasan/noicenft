@@ -24,10 +24,15 @@ import { nanoid } from 'nanoid'
 export default function Home() {
   const [query, setQuery] = useState('')
   const [selectedCollection, setSelectedCollection] = useState()
-  const { loading, error, data } = useApi(query, selectedCollection)
+  const [insightsPeriod, setInsightsPeriod] = useState('90d')
+  const { loading, error, data } = useApi(
+    query,
+    selectedCollection,
+    insightsPeriod
+  )
   const { search, newListings } = data || {}
 
-  console.log(data)
+  console.log('render')
 
   function handleSearchClick(collection) {
     console.log(
@@ -53,7 +58,13 @@ export default function Home() {
       </VStack>
 
       {data.collectionStats && (
-        <CollectionInfo data={data} selectedCollection={selectedCollection} />
+        <CollectionInfo
+          data={data}
+          selectedCollection={selectedCollection}
+          setInsightsPeriod={setInsightsPeriod}
+          insightsPeriod={insightsPeriod}
+          insightsIsLoading={loading?.insights}
+        />
       )}
 
       {selectedCollection && (

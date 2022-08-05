@@ -262,6 +262,21 @@ export async function getAssetsApi(contractAddress, tokenIds, options = {}) {
   }
 }
 
+export async function getListingsUniqApi(slug, count = 25) {
+  try {
+    console.log('fetching listings via uniq api...')
+
+    const data = await axios
+      .get(`https://api.uniq.cx/api/collections/last_listings/${slug}/${count}`)
+      .then((res) => res.data)
+
+    return data
+  } catch (err) {
+    console.log(err)
+    return null
+  }
+}
+
 // Traitsnper API ------------------------------
 export async function getTraitFloorPricesApi(slug) {
   try {
@@ -302,4 +317,29 @@ export async function getContractSalesStatsApi(contractAddress) {
     console.log(err)
     return null
   }
+}
+
+// OPENSEA API --------------------------------
+
+export async function getAssetContract(contractAddress) {
+  try {
+    const config = {
+      method: 'GET',
+      url: `https://api.opensea.io/api/v1/asset_contract/${contractAddress}/`,
+    }
+
+    const data = await axios(config).then((res) => res.data)
+
+    return data
+  } catch (err) {
+    console.log(err)
+    return null
+  }
+}
+
+// MESSARI API  --------------------------------
+export async function getEthMarketData() {
+  return axios
+    .get(`https://data.messari.io/api/v1/assets/eth/metrics/market-data`)
+    .then((res) => res.data)
 }

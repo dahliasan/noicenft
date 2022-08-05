@@ -1,4 +1,5 @@
-import React from 'react'
+import { useState } from 'react'
+import { nanoid } from 'nanoid'
 import {
   resolveUrl,
   shortenString,
@@ -15,16 +16,50 @@ import {
   Tooltip,
   SimpleGrid,
   Grid,
+  Stack,
+  Checkbox,
+  CheckboxGroup,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionIcon,
+  AccordionPanel,
+  ButtonGroup,
+  Button,
+  Spinner,
 } from '@chakra-ui/react'
 
 import { InfoIcon, TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons'
 import { EthIcon } from '../assets/myIcons'
 
-export default function CollectionInfo({ data, selectedCollection }) {
-  try {
-    console.log(data)
-    console.log(selectedCollection)
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RcTooltip,
+  Legend,
+  ResponsiveContainer,
+  ComposedChart,
+  Bar,
+  BarChart,
+} from 'recharts'
+import moment from 'moment'
 
+export default function CollectionInfo({
+  data,
+  selectedCollection,
+  setInsightsPeriod,
+  insightsPeriod,
+  insightsIsLoading,
+}) {
+  try {
+    const [checkedItems, setCheckedItems] = useState([
+      'min_price',
+      'avg_price',
+      'volume',
+    ])
     const { collectionInsights, collectionStats } = data || {}
 
     // destructure desired infomation
@@ -92,13 +127,234 @@ export default function CollectionInfo({ data, selectedCollection }) {
     insightsHistory.history.map((row) => {
       historicalData.push({
         ...row,
-        avg_price: Number(parseHex(row.avg_price)),
         max_price: Number(parseHex(row.max_price)),
+        avg_price: Number(parseHex(row.avg_price)),
         min_price: Number(parseHex(row.min_price)),
-        time: new Date(row.time),
-        volume: parseHex(row.volume),
+        time: row.time,
+        volume: Number(parseHex(row.volume)),
       })
     })
+
+    console.log('prepared historical data', historicalData)
+
+    function MyChart() {
+      const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+          return (
+            <Box
+              bg="#fff"
+              borderRadius="15px"
+              border="1px solid black"
+              p="10px"
+            >
+              <Text>{moment.utc(label).format('D MMM YYYY')}</Text>
+              {Object.keys(payload[0].payload).map((key) => {
+                if (key === 'time') return
+                return (
+                  <Flex justifyContent="space-between">
+                    <Text fontSize="sm">{key}</Text>
+                    <Text fontSize="sm" pl="1em">
+                      {' '}
+                      {payload[0].payload[key]}
+                    </Text>
+                  </Flex>
+                )
+              })}
+            </Box>
+          )
+        }
+
+        return null
+      }
+
+      // const CustomizedDot = (props) => {
+      //   const { cx, cy, stroke, payload, value } = props
+
+      //   if (payload.trades / payload.unique_buyers > 1)
+      //     return (
+      //       <circle
+      //         r="3"
+      //         type="monotone"
+      //         stroke="#000"
+      //         // stroke-width="1"
+      //         fill="#FD5200"
+      //         cx={cx}
+      //         cy={cy}
+      //       ></circle>
+      //     )
+
+      // }
+
+      const handleChange = (e) => {
+        try {
+          const { value } = e.target
+
+          // toggle item in checked items array
+          if (checkedItems.includes(value)) {
+            const index = checkedItems.indexOf(value)
+            console.log(index)
+            let array = [...checkedItems]
+            array.splice(index, 1)
+            setCheckedItems(array)
+          } else {
+            setCheckedItems((prevArray) => {
+              return [...prevArray, value]
+            })
+          }
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
+      const handleButtonClick = (e) => {
+        setInsightsPeriod(e.target.value)
+      }
+
+      const isButtonActive = (value) => value === insightsPeriod
+
+      return (
+        <Flex direction="column" gap={5}>
+          <ButtonGroup variant="outline" spacing={3} size="xs">
+            <Button
+              value="7d"
+              isActive={isButtonActive('7d')}
+              onClick={handleButtonClick}
+            >
+              7d
+            </Button>
+            <Button
+              value="30d"
+              isActive={isButtonActive('30d')}
+              onClick={handleButtonClick}
+            >
+              30d
+            </Button>
+            <Button
+              value="90d"
+              isActive={isButtonActive('90d')}
+              onClick={handleButtonClick}
+            >
+              90d
+            </Button>
+            <Button
+              value="365d"
+              isActive={isButtonActive('365d')}
+              onClick={handleButtonClick}
+            >
+              365d
+            </Button>
+            <Button
+              value="all_time"
+              isActive={isButtonActive('all_time')}
+              onClick={handleButtonClick}
+            >
+              all time
+            </Button>
+          </ButtonGroup>
+          <CheckboxGroup
+            size="sm"
+            defaultValue={checkedItems}
+            value={checkedItems}
+          >
+            <Flex gap={5}>
+              <Checkbox value="min_price" onChange={handleChange}>
+                min price
+              </Checkbox>
+              <Checkbox value="avg_price" onChange={handleChange}>
+                avg price
+              </Checkbox>
+              <Checkbox value="max_price" onChange={handleChange}>
+                max price
+              </Checkbox>
+              <Checkbox value="volume" onChange={handleChange}>
+                volume
+              </Checkbox>
+              <Checkbox value="trades" onChange={handleChange}>
+                trades
+              </Checkbox>
+            </Flex>
+          </CheckboxGroup>
+
+          {insightsIsLoading ? (
+            <Flex justifyContent="center" p={10}>
+              <Spinner thickness={4} />
+            </Flex>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <ComposedChart
+                data={historicalData}
+                margin={{ top: 10, right: 50, left: 0, bottom: 10 }}
+              >
+                <CartesianGrid stroke="#f5f5f5" />
+                <XAxis
+                  dataKey="time"
+                  padding={{ left: 30, right: 30 }}
+                  tickFormatter={(v) => moment.utc(v).format('D/M')}
+                />
+                <YAxis orientation="left" padding={{ bottom: 30 }} />
+                <YAxis yAxisId="right" orientation="right" hide={true} />
+                <RcTooltip
+                  labelFormatter={(v) => moment.utc(v).format('D MMM YYYY')}
+                  content={<CustomTooltip />}
+                />
+                <Legend />
+
+                {checkedItems.includes('volume') && (
+                  <Bar
+                    barSize={10}
+                    yAxisId="right"
+                    dataKey="volume"
+                    style={{ opacity: 0.5 }}
+                    fill="#00CFC1"
+                  />
+                )}
+
+                {checkedItems.includes('trades') && (
+                  <Bar
+                    barSize={10}
+                    yAxisId="right"
+                    dataKey="trades"
+                    style={{ opacity: 0.5 }}
+                    fill="#FD5200"
+                  />
+                )}
+
+                {checkedItems.includes('avg_price') && (
+                  <Line
+                    dot={false}
+                    type="monotone"
+                    dataKey="avg_price"
+                    stroke="#000"
+                    strokeWidth={3}
+                  />
+                )}
+                {checkedItems.includes('min_price') && (
+                  <Line
+                    dot={false}
+                    type="monotone"
+                    dataKey="min_price"
+                    stroke="#000"
+                    strokeWidth={2}
+                    strokeDasharray="9 3"
+                  />
+                )}
+
+                {checkedItems.includes('max_price') && (
+                  <Line
+                    dot={false}
+                    type="monotone"
+                    dataKey="max_price"
+                    stroke="#000"
+                    strokeWidth={2}
+                    strokeDasharray="9 3"
+                  />
+                )}
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+        </Flex>
+      )
+    }
 
     return (
       <Box mb={'4em'}>
@@ -158,15 +414,12 @@ export default function CollectionInfo({ data, selectedCollection }) {
               statsByPeriods={[
                 {
                   value: formatNumber(one_day_average_price),
-                  change: one_day_change,
                 },
                 {
                   value: formatNumber(seven_day_average_price),
-                  change: seven_day_change,
                 },
                 {
                   value: formatNumber(thirty_day_average_price),
-                  change: thirty_day_change,
                 },
                 {
                   value: formatNumber(parseHex(avg_price, 18, 2)),
@@ -200,12 +453,15 @@ export default function CollectionInfo({ data, selectedCollection }) {
               statsByPeriods={[
                 {
                   value: formatNumber(one_day_volume),
+                  change: one_day_change,
                 },
                 {
                   value: formatNumber(seven_day_volume),
+                  change: seven_day_change,
                 },
                 {
                   value: formatNumber(thirty_day_volume),
+                  change: thirty_day_change,
                 },
                 {
                   value: formatNumber(total_volume),
@@ -222,6 +478,22 @@ export default function CollectionInfo({ data, selectedCollection }) {
               {`(${((num_owners / total_supply) * 100).toFixed(0)}%)`}
             </MyStat>
           </Flex>
+
+          <Accordion allowToggle>
+            <AccordionItem>
+              <h2>
+                <AccordionButton>
+                  <Text textTransform="uppercase" letterSpacing="1px">
+                    Sales History
+                  </Text>
+                  <AccordionIcon />
+                </AccordionButton>
+              </h2>
+              <AccordionPanel>
+                <MyChart />
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
         </Flex>
       </Box>
     )
@@ -260,63 +532,6 @@ function MyStat(props) {
   )
 }
 
-function MyGroupStat(props) {
-  return (
-    <Flex direction="column" bg="gray.100" p={2} borderRadius="10px">
-      <Flex align="baseline">
-        <Text fontSize="sm">{props.label}</Text>
-        {props.showInfoIcon && (
-          <Tooltip label={props.tooltipLabel}>
-            <InfoIcon boxSize={'.7rem'} mx={2} />
-          </Tooltip>
-        )}
-      </Flex>
-
-      <Flex alignItems="center" fontSize="2xl">
-        {props.showEthIcon && <EthIcon2 />}
-        {props.children}
-      </Flex>
-
-      {props.statsByPeriods && (
-        <Grid
-          templateColumns="repeat(autofit, 1fr)"
-          templateRows="repeat(2, auto)"
-          autoFlow="column"
-          gap="1px 5px"
-        >
-          {props.statsByPeriods.map((period, index) => {
-            if (!period.value) return
-
-            return (
-              <>
-                {period.tooltipLabel ? (
-                  <Tooltip label={period.tooltipLabel}>
-                    <Text fontSize="xs">{props.statLabels[index]}</Text>
-                  </Tooltip>
-                ) : (
-                  <Text fontSize="xs">{props.statLabels[index]}</Text>
-                )}
-                <Flex align="baseline " gap={0.5}>
-                  <Text fontSize="xs"> {period.value} </Text>
-                  {period.change && (
-                    <Tooltip label={`change = ${period.change}`}>
-                      {period.change > 0 ? (
-                        <TriangleUpIcon boxSize={2} color="green.500" />
-                      ) : (
-                        <TriangleDownIcon boxSize={2} color="red.500" />
-                      )}
-                    </Tooltip>
-                  )}
-                </Flex>
-              </>
-            )
-          })}
-        </Grid>
-      )}
-    </Flex>
-  )
-}
-
 function MyGroupStatV2(props) {
   return (
     <Flex direction="column" bg="gray.100" p={2} borderRadius="10px" gap={1}>
@@ -339,7 +554,7 @@ function MyGroupStatV2(props) {
             if (!period.value) return
 
             return (
-              <Flex direction="column">
+              <Flex direction="column" key={nanoid()}>
                 {period.tooltipLabel ? (
                   <Tooltip label={period.tooltipLabel}>
                     <Flex alignItems="baseline" gap={1}>

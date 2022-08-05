@@ -11,7 +11,12 @@ import {
   getContractSalesStatsApi,
   getContractInsightsApi,
   getContractApi,
+  getAssetContract,
+  getListingsUniqApi,
+  getEthMarketData,
 } from '../helpers/apis.js'
+
+import { debounce } from 'lodash'
 
 export default function useApi(query, selectedCollection, insightsPeriod) {
   const [loading, setLoading] = useState({})
@@ -56,7 +61,13 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
       }
     }
 
-    searchCollections()
+    // searchCollections()
+
+    const debounceSearch = debounce(() => {
+      searchCollections()
+    }, 200)
+
+    debounceSearch()
 
     return () => abortController.abort()
   }, [query])
@@ -77,12 +88,57 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
 
         let contractAddress = selectedCollection.address
 
+        // get collection slug
+        console.log('fetching collection slug...')
+
+        const contractData = await getAssetContract(contractAddress)
+        console.log(contractData)
+        let slug = contractData.collection.slug
+
         // Get new listings
         console.log('fetching listings...')
-        const listingsData = await getNewListingsApi(contractAddress, {
-          signal: abortController.signal,
-        })
-        console.log('get new listings -- ', listingsData)
+        // const listingsData = await getNewListingsApi(contractAddress, {
+        //   signal: abortController.signal,
+        // })
+        // console.log('get new listings -- ', listingsData)
+
+        async function getLastListingsFromUniqApi(slug) {
+          const listingsData = await getListingsUniqApi(slug)
+          console.log('last listings', listingsData)
+
+          const ethMarketData = await getEthMarketData()
+          console.log(ethMarketData)
+
+          const ethUsdPrice = ethMarketData.data.market_data.price_usd
+
+          let normalisedListings = listingsData?.data.map((item) => {
+            const {
+              created_at,
+              image_url,
+              name,
+              opensea_url,
+              rank,
+              token_id,
+              value,
+            } = item
+            return {
+              tokenId: token_id,
+              image_url: image_url,
+              permalink: opensea_url,
+              price: value,
+              priceInUSD: value * ethUsdPrice,
+              priceSymbol: 'ETH',
+              eventTimestamp: created_at.replace('Z', ''),
+            }
+          })
+
+          return {
+            collection: slug,
+            listings: normalisedListings,
+          }
+        }
+
+        const listingsData = await getLastListingsFromUniqApi(slug)
 
         const tokenIds = listingsData.listings.map((item) => item.tokenId)
 
@@ -104,8 +160,6 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
           ...prev,
           newListings: { ...listingsData, listings: newListingsArray },
         }))
-
-        let slug = listingsData.collection
 
         return { contractAddress, slug }
       } catch (err) {
@@ -132,7 +186,10 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
         console.log('collection stats -- ', collectionStats)
 
         // Get collection insights
-        const collectionInsights = await getContractInsightsApi(contractAddress)
+        const collectionInsights = await getContractInsightsApi(
+          contractAddress,
+          insightsPeriod
+        )
         console.log('collection insights -- ', collectionInsights)
 
         setData((prev) => ({
@@ -158,6 +215,35 @@ export default function useApi(query, selectedCollection, insightsPeriod) {
       abortController.abort()
     }
   }, [selectedCollection])
+
+  // Fetch selected insights period
+  useEffect(() => {
+    if (!selectedCollection) return // ignore the first render
+
+    async function fetchContractInsights() {
+      try {
+        let contractAddress = selectedCollection.address
+
+        setLoading((prev) => ({ ...prev, insights: true }))
+        // Get collection insights
+        const collectionInsights = await getContractInsightsApi(
+          contractAddress,
+          insightsPeriod
+        )
+
+        setData((prev) => ({
+          ...prev,
+          collectionInsights: collectionInsights,
+        }))
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoading((prev) => ({ ...prev, insights: false }))
+      }
+    }
+
+    fetchContractInsights()
+  }, [insightsPeriod])
 
   // Fetch trending collections using rarify API
   // useEffect(() => {
