@@ -104,7 +104,7 @@ export default function Home() {
               maxWidth="100%"
               border="1px solid black"
               borderRadius="15px"
-              src="src/assets/nftgod_tweet.png"
+              src="https://github.com/dahliasan/noicenft/blob/7629199233f47ac8f9b750c4b4b9cc0643216b4d/src/assets/nftgod_tweet.png?raw=true"
             />
           </Link>
         </VStack>
