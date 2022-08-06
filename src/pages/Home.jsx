@@ -18,6 +18,8 @@ import {
   GridItem,
   AvatarBadge,
   Avatar,
+  Image,
+  Link,
 } from '@chakra-ui/react'
 import { nanoid } from 'nanoid'
 
@@ -90,6 +92,23 @@ export default function Home() {
           )
         })}
       </Grid>
+      {!selectedCollection && (
+        <VStack>
+          <Text mt={10}>This tool was originally inspired by:</Text>
+          <Link
+            href="https://twitter.com/NFT_GOD/status/1546483299090108418"
+            isExternal
+          >
+            <Image
+              width="400px"
+              maxWidth="100%"
+              border="1px solid black"
+              borderRadius="15px"
+              src="https://github.com/dahliasan/noicenft/blob/7629199233f47ac8f9b750c4b4b9cc0643216b4d/src/assets/nftgod_tweet.png?raw=true"
+            />
+          </Link>
+        </VStack>
+      )}
 
       {error && <div>error!</div>}
     </Container>
