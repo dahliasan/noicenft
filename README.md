@@ -1,4 +1,4 @@
-# NFT Flipper Helper
+# NoiceNft Analytics
 
 👀 View live [demo](https://noicenft.vercel.app)
 
@@ -6,7 +6,7 @@ This is a project I'm working on for the [buildspace Nights and Weekends 6-week 
 
 # Overview of this project
 
-The goal of this project is to help users make NFT buying decisions as new NFTs are listed
+The goal of this project is to help users easily track new opensea listings and identify undervalued nfts to flip with the help of data. 
 
 ## APIs used
 
